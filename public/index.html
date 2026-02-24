@@ -1,0 +1,811 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Claude Team Monitor</title>
+<style>
+  :root {
+    --bg: #0d1117;
+    --bg2: #161b22;
+    --bg3: #21262d;
+    --bg4: #30363d;
+    --border: #30363d;
+    --text: #e6edf3;
+    --text2: #8b949e;
+    --text3: #6e7681;
+    --accent: #58a6ff;
+    --green: #3fb950;
+    --yellow: #d29922;
+    --red: #f85149;
+    --purple: #bc8cff;
+    --orange: #e3b341;
+    --cyan: #79c0ff;
+    --lead: #ff7b72;
+    --font-mono: 'SF Mono', 'Fira Code', 'Cascadia Code', Consolas, monospace;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--font-mono);
+    font-size: 13px;
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+
+  /* ─── Header ─────────────────────────────────────────── */
+  #header {
+    background: var(--bg2);
+    border-bottom: 1px solid var(--border);
+    padding: 0 16px;
+    height: 48px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-shrink: 0;
+    gap: 12px;
+  }
+  #header .logo {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--text);
+  }
+  #header .logo-icon { font-size: 18px; }
+  #conn-status {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 11px;
+    color: var(--text2);
+  }
+  #conn-dot {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    background: var(--text3);
+    transition: background 0.3s;
+  }
+  #conn-dot.connected { background: var(--green); box-shadow: 0 0 6px var(--green); }
+  #conn-dot.error { background: var(--red); }
+  #last-update {
+    font-size: 11px;
+    color: var(--text3);
+  }
+  #team-tabs {
+    display: flex;
+    gap: 4px;
+    flex: 1;
+    overflow-x: auto;
+    padding: 0 8px;
+  }
+  .team-tab {
+    padding: 4px 12px;
+    border-radius: 4px;
+    border: 1px solid transparent;
+    background: transparent;
+    color: var(--text2);
+    cursor: pointer;
+    font-family: var(--font-mono);
+    font-size: 12px;
+    white-space: nowrap;
+    transition: all 0.15s;
+  }
+  .team-tab:hover { background: var(--bg3); color: var(--text); }
+  .team-tab.active { background: var(--bg3); border-color: var(--border); color: var(--accent); }
+  .team-tab.active::before { content: '▶ '; }
+
+  /* ─── Main layout ─────────────────────────────────────── */
+  #main {
+    display: grid;
+    grid-template-columns: 220px 1fr 300px;
+    grid-template-rows: 1fr 240px;
+    gap: 0;
+    flex: 1;
+    overflow: hidden;
+    border-top: 0;
+  }
+  .panel {
+    background: var(--bg);
+    border-right: 1px solid var(--border);
+    border-bottom: 1px solid var(--border);
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+  }
+  .panel-header {
+    padding: 8px 12px;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    color: var(--text3);
+    text-transform: uppercase;
+    background: var(--bg2);
+    border-bottom: 1px solid var(--border);
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .panel-body {
+    flex: 1;
+    overflow-y: auto;
+    padding: 8px;
+  }
+  .panel-body::-webkit-scrollbar { width: 4px; }
+  .panel-body::-webkit-scrollbar-track { background: transparent; }
+  .panel-body::-webkit-scrollbar-thumb { background: var(--bg4); border-radius: 2px; }
+
+  /* ─── Left: Team Members ─────────────────────────────── */
+  #panel-team { grid-column: 1; grid-row: 1; }
+  .member-card {
+    padding: 8px 10px;
+    border-radius: 6px;
+    border: 1px solid var(--border);
+    margin-bottom: 6px;
+    cursor: pointer;
+    transition: all 0.15s;
+    background: var(--bg2);
+  }
+  .member-card:hover { border-color: var(--accent); background: var(--bg3); }
+  .member-card.selected { border-color: var(--accent); background: var(--bg3); }
+  .member-card.no-team {
+    border-style: dashed;
+    color: var(--text3);
+    text-align: center;
+    cursor: default;
+  }
+  .member-card.no-team:hover { border-color: var(--border); background: var(--bg2); }
+  .member-name {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-weight: 600;
+    font-size: 12px;
+    margin-bottom: 3px;
+  }
+  .member-dot {
+    width: 7px; height: 7px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+  .member-dot.lead { background: var(--lead); box-shadow: 0 0 4px var(--lead); }
+  .member-dot.active { background: var(--green); box-shadow: 0 0 4px var(--green); }
+  .member-dot.inactive { background: var(--text3); }
+  .member-type {
+    font-size: 10px;
+    color: var(--text3);
+    padding: 1px 5px;
+    border-radius: 3px;
+    background: var(--bg4);
+  }
+  .member-meta {
+    font-size: 10px;
+    color: var(--text3);
+    margin-top: 2px;
+  }
+  .member-pane {
+    font-size: 10px;
+    color: var(--cyan);
+    margin-top: 2px;
+  }
+
+  /* ─── Middle: Task Board ─────────────────────────────── */
+  #panel-tasks { grid-column: 2; grid-row: 1; }
+  #task-board {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px;
+    padding: 8px;
+    height: 100%;
+    overflow-y: auto;
+  }
+  .task-col {
+    background: var(--bg2);
+    border-radius: 6px;
+    border: 1px solid var(--border);
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+    max-height: 100%;
+  }
+  .task-col-header {
+    padding: 6px 10px;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    flex-shrink: 0;
+  }
+  .task-col-header .col-count {
+    font-size: 10px;
+    color: var(--text3);
+    background: var(--bg4);
+    padding: 1px 5px;
+    border-radius: 10px;
+    margin-left: auto;
+  }
+  .col-pending .task-col-header { color: var(--text2); }
+  .col-progress .task-col-header { color: var(--yellow); }
+  .col-done .task-col-header { color: var(--green); }
+  .task-list {
+    overflow-y: auto;
+    padding: 6px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    flex: 1;
+  }
+  .task-card {
+    padding: 7px 9px;
+    border-radius: 4px;
+    border: 1px solid var(--border);
+    background: var(--bg3);
+    font-size: 11px;
+    cursor: default;
+  }
+  .task-card:hover { border-color: var(--accent); }
+  .task-id {
+    font-size: 10px;
+    color: var(--text3);
+    margin-bottom: 2px;
+  }
+  .task-title { color: var(--text); font-weight: 500; line-height: 1.4; word-break: break-all; }
+  .task-assignee {
+    font-size: 10px;
+    color: var(--cyan);
+    margin-top: 3px;
+  }
+  .no-tasks {
+    color: var(--text3);
+    font-size: 11px;
+    text-align: center;
+    padding: 16px;
+  }
+
+  /* ─── Right: Activity Feed ───────────────────────────── */
+  #panel-feed { grid-column: 3; grid-row: 1; }
+  .feed-item {
+    padding: 6px 0;
+    border-bottom: 1px solid var(--border);
+    font-size: 11px;
+    line-height: 1.5;
+  }
+  .feed-item:last-child { border-bottom: none; }
+  .feed-time { color: var(--text3); font-size: 10px; margin-right: 4px; }
+  .feed-from { color: var(--accent); font-weight: 600; }
+  .feed-arrow { color: var(--text3); margin: 0 3px; }
+  .feed-to { color: var(--purple); font-weight: 600; }
+  .feed-content {
+    color: var(--text2);
+    margin-top: 2px;
+    padding-left: 4px;
+    border-left: 2px solid var(--bg4);
+    word-break: break-all;
+  }
+  .feed-type-badge {
+    font-size: 9px;
+    padding: 1px 4px;
+    border-radius: 3px;
+    text-transform: uppercase;
+    margin-left: 4px;
+  }
+  .badge-message { background: #1f3b5a; color: var(--cyan); }
+  .badge-task { background: #1f3a1a; color: var(--green); }
+  .badge-tool { background: #2d1f3a; color: var(--purple); }
+  .empty-feed {
+    color: var(--text3);
+    font-size: 11px;
+    text-align: center;
+    padding: 24px 12px;
+  }
+
+  /* ─── Bottom: Terminal ───────────────────────────────── */
+  #panel-terminal {
+    grid-column: 1 / 4;
+    grid-row: 2;
+    border-right: none;
+    border-bottom: none;
+  }
+  #terminal-tabs {
+    display: flex;
+    gap: 2px;
+    flex: 1;
+    overflow-x: auto;
+  }
+  .term-tab {
+    padding: 2px 10px;
+    border-radius: 3px;
+    background: transparent;
+    border: 1px solid transparent;
+    color: var(--text3);
+    cursor: pointer;
+    font-family: var(--font-mono);
+    font-size: 11px;
+    white-space: nowrap;
+    transition: all 0.15s;
+  }
+  .term-tab:hover { background: var(--bg3); color: var(--text2); }
+  .term-tab.active { background: var(--bg3); border-color: var(--border); color: var(--green); }
+  #terminal-output {
+    flex: 1;
+    overflow-y: auto;
+    padding: 8px 12px;
+    background: #0a0d12;
+  }
+  #terminal-output::-webkit-scrollbar { width: 4px; }
+  #terminal-output::-webkit-scrollbar-thumb { background: var(--bg4); }
+  #term-pre {
+    font-family: var(--font-mono);
+    font-size: 12px;
+    color: #a8c7a0;
+    white-space: pre-wrap;
+    word-break: break-all;
+    line-height: 1.5;
+  }
+  .term-no-pane {
+    color: var(--text3);
+    font-size: 12px;
+    padding: 8px;
+  }
+
+  /* ─── Stats bar ──────────────────────────────────────── */
+  #stats-bar {
+    background: var(--bg2);
+    border-top: 1px solid var(--border);
+    padding: 4px 16px;
+    display: flex;
+    gap: 16px;
+    align-items: center;
+    flex-shrink: 0;
+    font-size: 11px;
+    color: var(--text3);
+    overflow-x: auto;
+  }
+  .stat-item { display: flex; align-items: center; gap: 4px; }
+  .stat-key { color: var(--text3); }
+  .stat-val { color: var(--text2); font-weight: 500; }
+  .stat-sep { color: var(--bg4); }
+  #no-team-msg {
+    grid-column: 1 / 4;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--text3);
+    font-size: 13px;
+    flex-direction: column;
+    gap: 8px;
+  }
+  #no-team-msg .hint { font-size: 11px; }
+
+  /* scrollbar */
+  ::-webkit-scrollbar { width: 4px; height: 4px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: var(--bg4); border-radius: 2px; }
+</style>
+</head>
+<body>
+
+<!-- Header -->
+<div id="header">
+  <div class="logo">
+    <span class="logo-icon">⬡</span>
+    Claude Team Monitor
+  </div>
+  <div id="team-tabs"></div>
+  <div id="conn-status">
+    <div id="conn-dot"></div>
+    <span id="conn-label">connecting…</span>
+  </div>
+  <div id="last-update">–</div>
+</div>
+
+<!-- Main grid -->
+<div id="main">
+  <!-- Left: Members -->
+  <div class="panel" id="panel-team">
+    <div class="panel-header">
+      <span>Members</span>
+      <span id="member-count" style="color:var(--text3);font-size:10px"></span>
+    </div>
+    <div class="panel-body" id="member-list"></div>
+  </div>
+
+  <!-- Middle: Tasks -->
+  <div class="panel" id="panel-tasks">
+    <div class="panel-header">
+      <span>Tasks</span>
+      <span id="task-project" style="color:var(--cyan);font-size:10px"></span>
+    </div>
+    <div id="task-board">
+      <div class="task-col col-pending">
+        <div class="task-col-header">
+          <span>Pending</span>
+          <span class="col-count" id="cnt-pending">0</span>
+        </div>
+        <div class="task-list" id="col-pending"></div>
+      </div>
+      <div class="task-col col-progress">
+        <div class="task-col-header">
+          <span>In Progress</span>
+          <span class="col-count" id="cnt-progress">0</span>
+        </div>
+        <div class="task-list" id="col-progress"></div>
+      </div>
+      <div class="task-col col-done">
+        <div class="task-col-header">
+          <span>Done</span>
+          <span class="col-count" id="cnt-done">0</span>
+        </div>
+        <div class="task-list" id="col-done"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Right: Activity feed -->
+  <div class="panel" id="panel-feed">
+    <div class="panel-header">
+      <span>Activity</span>
+      <span id="feed-count" style="color:var(--text3);font-size:10px"></span>
+    </div>
+    <div class="panel-body" id="feed-list">
+      <div class="empty-feed">No messages yet<br><span style="font-size:10px">Waiting for agent activity…</span></div>
+    </div>
+  </div>
+
+  <!-- Bottom: Terminal -->
+  <div class="panel" id="panel-terminal">
+    <div class="panel-header">
+      <span>Terminal</span>
+      <div id="terminal-tabs"></div>
+    </div>
+    <div id="terminal-output">
+      <pre id="term-pre" class="term-no-pane">Select a member above to view tmux output</pre>
+    </div>
+  </div>
+</div>
+
+<!-- Stats bar -->
+<div id="stats-bar">
+  <span class="stat-item"><span class="stat-key">Teams:</span><span class="stat-val" id="st-teams">0</span></span>
+  <span class="stat-sep">|</span>
+  <span class="stat-item"><span class="stat-key">Members:</span><span class="stat-val" id="st-members">0</span></span>
+  <span class="stat-sep">|</span>
+  <span class="stat-item"><span class="stat-key">Tasks:</span><span class="stat-val" id="st-tasks">0</span></span>
+  <span class="stat-sep">|</span>
+  <span id="st-tools" style="display:flex;gap:8px;align-items:center;flex-wrap:wrap"></span>
+</div>
+
+<script>
+// ─── State ────────────────────────────────────────────────────────────────────
+const S = {
+  teams: {},
+  tasks: {},
+  messages: {},   // teamName → []
+  tmux: {},       // agentId → lines
+  stats: {},
+  selectedTeam: null,
+  selectedAgent: null,
+  feedItems: [],
+};
+
+// ─── WS ──────────────────────────────────────────────────────────────────────
+let ws, reconnectTimer;
+
+function connect() {
+  const proto = location.protocol === 'https:' ? 'wss' : 'ws';
+  ws = new WebSocket(`${proto}://${location.host}`);
+
+  ws.onopen = () => {
+    setConn('connected');
+    clearTimeout(reconnectTimer);
+  };
+
+  ws.onclose = () => {
+    setConn('error');
+    reconnectTimer = setTimeout(connect, 3000);
+  };
+
+  ws.onerror = () => setConn('error');
+
+  ws.onmessage = ({ data }) => {
+    try {
+      const msg = JSON.parse(data);
+      handleMsg(msg);
+      setLastUpdate(msg.ts);
+    } catch {}
+  };
+}
+
+function handleMsg({ type, data }) {
+  switch (type) {
+    case 'snapshot':
+      S.teams   = data.teams   || {};
+      S.tasks   = data.tasks   || {};
+      S.stats   = data.stats   || {};
+      S.messages = data.messages || {};
+      S.tmux    = data.tmuxOutputs || {};
+      // Auto-select first team
+      if (!S.selectedTeam) {
+        const first = Object.keys(S.teams)[0];
+        if (first) S.selectedTeam = first;
+      }
+      renderAll();
+      break;
+    case 'teams':
+      S.teams = data;
+      if (!S.selectedTeam || !S.teams[S.selectedTeam]) {
+        S.selectedTeam = Object.keys(S.teams)[0] || null;
+      }
+      renderTeamTabs();
+      renderMembers();
+      renderStats();
+      break;
+    case 'tasks':
+      S.tasks = data;
+      renderTasks();
+      renderStats();
+      break;
+    case 'messages':
+      if (data.teamName) {
+        S.messages[data.teamName] = data.messages || data;
+      } else {
+        // bulk update
+        Object.assign(S.messages, data);
+      }
+      if (data.teamName === S.selectedTeam || !data.teamName) renderFeed();
+      break;
+    case 'tmux':
+      S.tmux[data.agentId] = data.lines;
+      if (data.agentId === S.selectedAgent) renderTerminal(data.lines);
+      break;
+    case 'stats':
+      S.stats = data;
+      renderStats();
+      break;
+  }
+}
+
+// ─── Render ───────────────────────────────────────────────────────────────────
+function renderAll() {
+  renderTeamTabs();
+  renderMembers();
+  renderTasks();
+  renderFeed();
+  renderTerminal();
+  renderStats();
+}
+
+function renderTeamTabs() {
+  const el = document.getElementById('team-tabs');
+  const names = Object.keys(S.teams);
+  el.innerHTML = names.map(name => {
+    const t = S.teams[name];
+    const active = name === S.selectedTeam ? 'active' : '';
+    const memberCount = (t.members || []).length;
+    return `<button class="team-tab ${active}" onclick="selectTeam('${esc(name)}')">${esc(name)} <span style="opacity:0.5;font-size:10px">(${memberCount})</span></button>`;
+  }).join('');
+
+  if (names.length === 0) {
+    el.innerHTML = '<span style="color:var(--text3);font-size:11px;padding:0 8px">No active teams</span>';
+  }
+}
+
+function selectTeam(name) {
+  S.selectedTeam = name;
+  S.selectedAgent = null;
+  renderTeamTabs();
+  renderMembers();
+  renderTasks();
+  renderFeed();
+  renderTerminalTabs();
+  document.getElementById('term-pre').textContent = 'Select a member to view terminal output';
+  document.getElementById('term-pre').className = 'term-no-pane';
+}
+
+function renderMembers() {
+  const el = document.getElementById('member-list');
+  const team = S.teams[S.selectedTeam];
+  if (!team) {
+    el.innerHTML = '<div class="member-card no-team">No team selected</div>';
+    document.getElementById('member-count').textContent = '';
+    return;
+  }
+  const members = team.members || [];
+  document.getElementById('member-count').textContent = members.length + ' agents';
+
+  el.innerHTML = members.map(m => {
+    const isLead = m.agentType === 'team-lead' || m.agentId === team.leadAgentId;
+    const dotClass = isLead ? 'lead' : (m.isActive ? 'active' : 'inactive');
+    const selected = m.agentId === S.selectedAgent ? 'selected' : '';
+    const hasPane = m.tmuxPaneId ? `<div class="member-pane">pane ${esc(m.tmuxPaneId)}</div>` : '';
+    return `
+      <div class="member-card ${selected}" onclick="selectAgent('${esc(m.agentId)}','${esc(m.tmuxPaneId || '')}','${esc(team.name)}')">
+        <div class="member-name">
+          <span class="member-dot ${dotClass}"></span>
+          ${esc(m.name)}
+          <span class="member-type">${isLead ? 'lead' : esc(m.agentType || 'agent')}</span>
+        </div>
+        <div class="member-meta">${esc(m.model || '–')}</div>
+        ${hasPane}
+      </div>`;
+  }).join('');
+}
+
+function selectAgent(agentId, paneId, teamName) {
+  S.selectedAgent = agentId;
+  renderMembers();
+  renderTerminalTabs();
+
+  // Show cached tmux or request fresh
+  if (S.tmux[agentId]) {
+    renderTerminal(S.tmux[agentId]);
+  } else if (paneId) {
+    document.getElementById('term-pre').textContent = `Fetching pane ${paneId}…`;
+    document.getElementById('term-pre').className = '';
+    if (ws && ws.readyState === 1) {
+      ws.send(JSON.stringify({ action: 'captureTmux', payload: { paneId, agentId, teamName } }));
+    }
+  } else {
+    document.getElementById('term-pre').textContent = 'No tmux pane assigned to this agent.';
+    document.getElementById('term-pre').className = 'term-no-pane';
+  }
+}
+
+function renderTerminalTabs() {
+  const el = document.getElementById('terminal-tabs');
+  const team = S.teams[S.selectedTeam];
+  if (!team) { el.innerHTML = ''; return; }
+  const members = (team.members || []).filter(m => m.tmuxPaneId);
+  el.innerHTML = members.map(m => {
+    const active = m.agentId === S.selectedAgent ? 'active' : '';
+    return `<button class="term-tab ${active}" onclick="selectAgent('${esc(m.agentId)}','${esc(m.tmuxPaneId)}','${esc(team.name)}')">${esc(m.name)}</button>`;
+  }).join('');
+}
+
+function renderTerminal(lines) {
+  const pre = document.getElementById('term-pre');
+  if (!lines || lines.trim() === '') {
+    pre.textContent = '(no output)';
+    pre.className = 'term-no-pane';
+    return;
+  }
+  pre.className = '';
+  pre.textContent = lines;
+  // Auto-scroll
+  const out = document.getElementById('terminal-output');
+  out.scrollTop = out.scrollHeight;
+}
+
+function renderTasks() {
+  // Find tasks matching selected team name
+  const teamName = S.selectedTeam;
+  let allTasks = [];
+
+  // Check direct match
+  if (S.tasks[teamName]) {
+    allTasks = S.tasks[teamName];
+  } else {
+    // Try to find project folder matching team
+    const keys = Object.keys(S.tasks);
+    const match = keys.find(k => k.includes(teamName) || teamName.includes(k));
+    if (match) {
+      allTasks = S.tasks[match];
+      document.getElementById('task-project').textContent = match;
+    } else if (keys.length > 0) {
+      // Show most recent project
+      const last = keys[keys.length - 1];
+      allTasks = S.tasks[last] || [];
+      document.getElementById('task-project').textContent = last;
+    }
+  }
+
+  const pending    = allTasks.filter(t => t.status === 'pending' || !t.status);
+  const inProgress = allTasks.filter(t => t.status === 'in_progress');
+  const done       = allTasks.filter(t => t.status === 'completed' || t.status === 'done');
+
+  renderTaskCol('col-pending',  'cnt-pending',  pending);
+  renderTaskCol('col-progress', 'cnt-progress', inProgress);
+  renderTaskCol('col-done',     'cnt-done',     done);
+}
+
+function renderTaskCol(listId, countId, tasks) {
+  document.getElementById(countId).textContent = tasks.length;
+  const el = document.getElementById(listId);
+  if (tasks.length === 0) {
+    el.innerHTML = '<div class="no-tasks">–</div>';
+    return;
+  }
+  el.innerHTML = tasks.map(t => {
+    const id = t.id ? `<div class="task-id">#${esc(String(t.id).slice(0, 8))}</div>` : '';
+    const title = esc(t.title || t.description || t.name || JSON.stringify(t).slice(0, 60));
+    const assignee = t.assignedTo ? `<div class="task-assignee">→ ${esc(t.assignedTo)}</div>` : '';
+    return `<div class="task-card">${id}<div class="task-title">${title}</div>${assignee}</div>`;
+  }).join('');
+}
+
+function renderFeed() {
+  const el = document.getElementById('feed-list');
+  const msgs = S.messages[S.selectedTeam] || [];
+
+  if (msgs.length === 0) {
+    el.innerHTML = '<div class="empty-feed">No messages yet<br><span style="font-size:10px">Waiting for agent activity…</span></div>';
+    document.getElementById('feed-count').textContent = '';
+    return;
+  }
+
+  document.getElementById('feed-count').textContent = msgs.length + ' msgs';
+  // Show newest last
+  const items = [...msgs].slice(-100);
+  el.innerHTML = items.map(m => {
+    const time = m.timestamp ? new Date(m.timestamp).toLocaleTimeString('ko', { hour: '2-digit', minute: '2-digit', second: '2-digit' }) : '';
+    const from = m.from || m.sender || '?';
+    const to   = m.to   || m.recipient || '';
+    const content = m.content || m.summary || m.message || '';
+    const toHtml = to ? `<span class="feed-arrow">→</span><span class="feed-to">${esc(to)}</span>` : '';
+    const badge = `<span class="feed-type-badge badge-message">${esc(m.type || 'msg')}</span>`;
+    return `
+      <div class="feed-item">
+        <span class="feed-time">${time}</span>
+        <span class="feed-from">${esc(from)}</span>${toHtml}${badge}
+        <div class="feed-content">${esc(String(content).slice(0, 200))}</div>
+      </div>`;
+  }).join('');
+
+  el.scrollTop = el.scrollHeight;
+}
+
+function renderStats() {
+  document.getElementById('st-teams').textContent   = Object.keys(S.teams).length;
+  document.getElementById('st-members').textContent = Object.values(S.teams).reduce((n, t) => n + (t.members || []).length, 0);
+
+  const totalTasks = Object.values(S.tasks).reduce((n, arr) => n + (arr || []).length, 0);
+  document.getElementById('st-tasks').textContent = totalTasks;
+
+  // Tool counts from latest session
+  const sessions = S.stats.sessions || {};
+  const sessionIds = Object.keys(sessions);
+  if (sessionIds.length === 0) return;
+  const latest = sessions[sessionIds[sessionIds.length - 1]];
+  if (!latest || !latest.tool_counts) return;
+  const tc = latest.tool_counts;
+  const toolEl = document.getElementById('st-tools');
+  toolEl.innerHTML = Object.entries(tc)
+    .sort((a, b) => b[1] - a[1])
+    .slice(0, 8)
+    .map(([k, v]) => `<span class="stat-item"><span class="stat-key">${esc(k.replace(/^mcp__.*__/, ''))}</span><span class="stat-val">${v}</span></span>`)
+    .join('<span class="stat-sep">·</span>');
+}
+
+// ─── Helpers ──────────────────────────────────────────────────────────────────
+function esc(s) {
+  return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+}
+
+function setConn(status) {
+  const dot = document.getElementById('conn-dot');
+  const lbl = document.getElementById('conn-label');
+  dot.className = status;
+  lbl.textContent = status === 'connected' ? 'Live' : status === 'error' ? 'Reconnecting…' : 'Connecting…';
+}
+
+function setLastUpdate(ts) {
+  const el = document.getElementById('last-update');
+  if (!ts) return;
+  const d = new Date(ts);
+  el.textContent = d.toLocaleTimeString('ko', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+}
+
+// ─── Boot ─────────────────────────────────────────────────────────────────────
+connect();
+</script>
+</body>
+</html>
