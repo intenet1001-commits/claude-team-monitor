@@ -178,12 +178,159 @@ wss.on('connection', ws => {
   });
 });
 
+// ─── Plugin scanner ───────────────────────────────────────────────────────────
+
+const PLUGINS_CACHE_DIR = path.join(os.homedir(), '.claude', 'plugins', 'cache');
+const SKILLS_DIR = path.join(os.homedir(), '.claude', 'skills');
+
+function parseFrontmatter(content) {
+  const match = content.match(/^---\n([\s\S]*?)\n---/);
+  if (!match) return {};
+  const result = {};
+  match[1].split('\n').forEach(line => {
+    const m = line.match(/^(\w[\w-]*):\s*"?(.+?)"?\s*$/);
+    if (m) result[m[1]] = m[2];
+  });
+  return result;
+}
+
+function scanPlugins() {
+  const commands = [];
+  const agents = [];
+  if (!fs.existsSync(PLUGINS_CACHE_DIR)) return { commands, agents };
+
+  try {
+    const marketplaces = fs.readdirSync(PLUGINS_CACHE_DIR);
+    marketplaces.forEach(marketplace => {
+      const mDir = path.join(PLUGINS_CACHE_DIR, marketplace);
+      if (!fs.statSync(mDir).isDirectory()) return;
+
+      fs.readdirSync(mDir).forEach(pluginName => {
+        const pDir = path.join(mDir, pluginName);
+        if (!fs.statSync(pDir).isDirectory()) return;
+
+        // Get latest version
+        const versions = fs.readdirSync(pDir).filter(v => /^\d/.test(v)).sort().reverse();
+        if (versions.length === 0) return;
+        const vDir = path.join(pDir, versions[0]);
+
+        // Scan commands/*.md
+        const cmdDir = path.join(vDir, 'commands');
+        if (fs.existsSync(cmdDir)) {
+          fs.readdirSync(cmdDir).filter(f => f.endsWith('.md')).forEach(f => {
+            try {
+              const fm = parseFrontmatter(fs.readFileSync(path.join(cmdDir, f), 'utf8'));
+              const cmdName = f.replace('.md', '');
+              if (fm.description) {
+                commands.push({
+                  plugin: pluginName,
+                  command: `/${pluginName}:${cmdName}`,
+                  name: fm.name || cmdName,
+                  description: fm.description
+                });
+              }
+            } catch {}
+          });
+        }
+
+        // Scan skills/*/SKILL.md
+        const skillsDir = path.join(vDir, 'skills');
+        if (fs.existsSync(skillsDir)) {
+          fs.readdirSync(skillsDir).forEach(skillName => {
+            const skillFile = path.join(skillsDir, skillName, 'SKILL.md');
+            if (!fs.existsSync(skillFile)) return;
+            try {
+              const fm = parseFrontmatter(fs.readFileSync(skillFile, 'utf8'));
+              if (fm.description) {
+                commands.push({
+                  plugin: pluginName,
+                  command: `/${pluginName}:${skillName}`,
+                  name: fm.name || skillName,
+                  description: fm.description,
+                  aliases: fm.aliases || ''
+                });
+              }
+            } catch {}
+          });
+        }
+
+        // Scan agents/
+        const agentDir = path.join(vDir, 'agents');
+        if (fs.existsSync(agentDir)) {
+          fs.readdirSync(agentDir).filter(f => f.endsWith('.md')).forEach(f => {
+            try {
+              const fm = parseFrontmatter(fs.readFileSync(path.join(agentDir, f), 'utf8'));
+              if (fm.description) {
+                agents.push({
+                  plugin: pluginName,
+                  name: fm.name || f.replace('.md', ''),
+                  description: fm.description,
+                  model: fm.model || ''
+                });
+              }
+            } catch {}
+          });
+        }
+      });
+    });
+  } catch {}
+
+  // Scan ~/.claude/skills/ (global skills)
+  if (fs.existsSync(SKILLS_DIR)) {
+    try {
+      fs.readdirSync(SKILLS_DIR).forEach(skillName => {
+        const skillFile = path.join(SKILLS_DIR, skillName, 'SKILL.md');
+        if (!fs.existsSync(skillFile)) return;
+        try {
+          const fm = parseFrontmatter(fs.readFileSync(skillFile, 'utf8'));
+          if (fm.description) {
+            commands.push({
+              plugin: fm.source ? fm.source.split(' ')[0] : 'skills',
+              command: `/${skillName}`,
+              name: fm.name || skillName,
+              description: fm.description
+            });
+          }
+        } catch {}
+      });
+    } catch {}
+  }
+
+  return { commands, agents };
+}
+
 // ─── REST API ────────────────────────────────────────────────────────────────
 
+app.get('/api/plugins', (req, res) => res.json(scanPlugins()));
 app.get('/api/state', (req, res) => res.json(state));
 app.get('/api/teams', (req, res) => res.json(state.teams));
 app.get('/api/tasks', (req, res) => res.json(state.tasks));
 app.get('/api/stats', (req, res) => res.json(state.stats));
+
+app.post('/api/refresh', (req, res) => {
+  readTeams();
+  readTasks();
+  readStats();
+  readAllMessages();
+  broadcast('snapshot', state);
+  res.json({ ok: true });
+});
+
+app.delete('/api/teams/:name', (req, res) => {
+  const name = path.basename(req.params.name);
+  const teamDir = path.join(TEAMS_DIR, name);
+  try {
+    if (fs.existsSync(teamDir)) {
+      fs.rmSync(teamDir, { recursive: true, force: true });
+    }
+    delete state.teams[name];
+    delete state.messages[name];
+    broadcast('teams', state.teams);
+    res.json({ ok: true });
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
+});
 
 // ─── Boot ────────────────────────────────────────────────────────────────────
 

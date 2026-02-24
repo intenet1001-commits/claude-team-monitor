@@ -356,6 +356,88 @@
     font-size: 12px;
     padding: 8px;
   }
+  .term-status-msg {
+    color: var(--text2);
+    font-size: 12px;
+    padding: 12px;
+    line-height: 1.7;
+  }
+  .term-status-msg .status-title {
+    color: var(--yellow);
+    font-weight: 600;
+    display: block;
+    margin-bottom: 4px;
+  }
+  .term-status-msg .status-reason {
+    color: var(--text3);
+    font-size: 11px;
+  }
+
+  /* ─── LIVE / 종료 badges ─────────────────────────────── */
+  .badge-live {
+    display: inline-flex;
+    align-items: center;
+    gap: 3px;
+    font-size: 9px;
+    padding: 1px 5px;
+    border-radius: 3px;
+    background: rgba(63,185,80,0.15);
+    color: var(--green);
+    font-weight: 700;
+    vertical-align: middle;
+    margin-left: 4px;
+  }
+  .badge-live .live-dot {
+    width: 5px; height: 5px;
+    border-radius: 50%;
+    background: var(--green);
+    animation: livePulse 1.4s ease-in-out infinite;
+    flex-shrink: 0;
+  }
+  @keyframes livePulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.3; }
+  }
+  .badge-ended {
+    display: inline-block;
+    font-size: 9px;
+    padding: 1px 5px;
+    border-radius: 3px;
+    background: var(--bg4);
+    color: var(--text3);
+    vertical-align: middle;
+    margin-left: 4px;
+  }
+  .team-tab.ended { opacity: 0.55; }
+
+  /* ─── No teams overlay ───────────────────────────────── */
+  #no-team-overlay {
+    display: none;
+    grid-column: 1 / 4;
+    grid-row: 1 / 3;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 14px;
+    background: var(--bg);
+    z-index: 10;
+    color: var(--text3);
+    font-size: 14px;
+    text-align: center;
+  }
+  #main.no-teams #no-team-overlay { display: flex; }
+  #no-team-overlay .overlay-icon { font-size: 32px; opacity: 0.4; }
+  #no-team-overlay .overlay-title { font-size: 14px; color: var(--text2); }
+  #no-team-overlay .overlay-sub { font-size: 11px; color: var(--text3); }
+  #no-team-overlay .hint-cmd {
+    font-size: 12px;
+    color: var(--accent);
+    background: var(--bg3);
+    padding: 6px 14px;
+    border-radius: 4px;
+    border: 1px solid var(--border);
+    font-family: var(--font-mono);
+  }
 
   /* ─── Stats bar ──────────────────────────────────────── */
   #stats-bar {
@@ -386,10 +468,365 @@
   }
   #no-team-msg .hint { font-size: 11px; }
 
+  /* ─── History panel ──────────────────────────────────── */
+  #history-panel {
+    position: fixed;
+    top: 48px; right: 0;
+    width: 320px; height: calc(100vh - 48px);
+    background: var(--bg2);
+    border-left: 1px solid var(--border);
+    display: flex; flex-direction: column;
+    z-index: 100;
+    transform: translateX(100%);
+    transition: transform 0.2s ease;
+  }
+  #history-panel.open { transform: translateX(0); }
+  .history-header {
+    padding: 10px 14px;
+    font-size: 11px; font-weight: 600;
+    letter-spacing: 0.08em; text-transform: uppercase;
+    color: var(--text3);
+    background: var(--bg2);
+    border-bottom: 1px solid var(--border);
+    display: flex; align-items: center; justify-content: space-between;
+  }
+  .history-list { flex: 1; overflow-y: auto; padding: 6px; }
+  .history-item {
+    padding: 8px 10px;
+    border-radius: 5px;
+    border: 1px solid var(--border);
+    background: var(--bg3);
+    margin-bottom: 5px;
+    display: flex; align-items: center; gap: 8px;
+  }
+  .history-item-info { flex: 1; min-width: 0; }
+  .history-item-name {
+    font-size: 11px; color: var(--text); font-weight: 500;
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  }
+  .history-item-meta { font-size: 10px; color: var(--text3); margin-top: 2px; }
+  .history-del-btn {
+    background: transparent; border: 1px solid var(--border);
+    color: var(--text3); border-radius: 3px;
+    padding: 2px 7px; font-size: 10px; cursor: pointer;
+    font-family: var(--font-mono); flex-shrink: 0;
+    transition: all 0.15s;
+  }
+  .history-del-btn:hover { border-color: var(--red); color: var(--red); }
+  .history-footer {
+    padding: 10px 14px;
+    border-top: 1px solid var(--border);
+    display: flex; gap: 6px;
+  }
+  .history-action-btn {
+    flex: 1; padding: 6px; border-radius: 4px;
+    border: 1px solid var(--border);
+    background: var(--bg3); color: var(--text2);
+    font-family: var(--font-mono); font-size: 11px;
+    cursor: pointer; transition: all 0.15s;
+  }
+  .history-action-btn:hover { border-color: var(--accent); color: var(--accent); }
+  .history-action-btn.danger:hover { border-color: var(--red); color: var(--red); }
+  #history-btn, #refresh-btn, #skills-btn {
+    padding: 3px 9px; border-radius: 4px;
+    border: 1px solid var(--border);
+    background: transparent; color: var(--text2);
+    font-family: var(--font-mono); font-size: 11px;
+    cursor: pointer; transition: all 0.15s; white-space: nowrap;
+  }
+  #history-btn:hover, #refresh-btn:hover, #skills-btn:hover { border-color: var(--accent); color: var(--accent); }
+  #history-btn.active { border-color: var(--accent); color: var(--accent); }
+  #skills-btn.active { border-color: var(--purple); color: var(--purple); }
+  #refresh-btn.spinning { color: var(--green); }
+
+  /* ─── Skills panel ───────────────────────────────────── */
+  #skills-panel {
+    position: fixed;
+    top: 48px; left: 0;
+    width: 340px; height: calc(100vh - 48px);
+    background: var(--bg2);
+    border-right: 1px solid var(--border);
+    display: flex; flex-direction: column;
+    z-index: 100;
+    transform: translateX(-100%);
+    transition: transform 0.2s ease;
+  }
+  #skills-panel.open { transform: translateX(0); }
+  .skills-header {
+    padding: 10px 14px;
+    font-size: 11px; font-weight: 600;
+    letter-spacing: 0.08em; text-transform: uppercase;
+    color: var(--text3);
+    background: var(--bg2);
+    border-bottom: 1px solid var(--border);
+    display: flex; align-items: center; justify-content: space-between;
+    flex-shrink: 0;
+  }
+  #skills-search {
+    margin: 8px;
+    padding: 5px 10px;
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    color: var(--text);
+    font-family: var(--font-mono);
+    font-size: 11px;
+    outline: none;
+    flex-shrink: 0;
+  }
+  #skills-search:focus { border-color: var(--accent); }
+  #skills-search::placeholder { color: var(--text3); }
+  .skills-list { flex: 1; overflow-y: auto; padding: 4px 8px 8px; }
+  .skills-group-title {
+    font-size: 9px; font-weight: 700;
+    letter-spacing: 0.1em; text-transform: uppercase;
+    color: var(--text3);
+    padding: 10px 4px 4px;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 4px;
+  }
+  .skill-item {
+    padding: 7px 10px;
+    border-radius: 5px;
+    border: 1px solid transparent;
+    margin-bottom: 3px;
+    cursor: default;
+    transition: all 0.12s;
+  }
+  .skill-item:hover { background: var(--bg3); border-color: var(--border); }
+  .skill-item-name {
+    font-size: 11px; color: var(--accent);
+    font-weight: 600; margin-bottom: 2px;
+    display: flex; align-items: center; justify-content: space-between; gap: 6px;
+  }
+  .skill-item-desc { font-size: 10px; color: var(--text2); line-height: 1.5; }
+  .skill-copy-btn {
+    flex-shrink: 0;
+    padding: 1px 6px; border-radius: 3px;
+    border: 1px solid var(--border);
+    background: transparent; color: var(--text3);
+    font-family: var(--font-mono); font-size: 9px;
+    cursor: pointer; transition: all 0.12s; white-space: nowrap;
+  }
+  .skill-copy-btn:hover { border-color: var(--accent); color: var(--accent); }
+  .skill-copy-btn.copied { border-color: var(--green); color: var(--green); }
+  .skills-filter-bar {
+    padding: 0 8px 4px;
+    flex-shrink: 0;
+  }
+  .skills-filter-btn {
+    padding: 4px 10px;
+    border-radius: 4px;
+    border: 1px solid var(--border);
+    background: transparent;
+    color: var(--text3);
+    font-family: var(--font-mono); font-size: 10px;
+    cursor: pointer; transition: all 0.15s;
+    white-space: nowrap;
+  }
+  .skills-filter-btn:hover { border-color: var(--purple); color: var(--purple); }
+  .skills-filter-btn.active {
+    border-color: var(--purple);
+    color: var(--purple);
+    background: rgba(188,140,255,0.1);
+  }
+  .skill-team-badge {
+    display: inline-block;
+    font-size: 9px; padding: 1px 5px;
+    border-radius: 3px;
+    background: rgba(188,140,255,0.15);
+    color: var(--purple);
+    margin-left: 4px;
+    vertical-align: middle;
+    flex-shrink: 0;
+  }
+
   /* scrollbar */
   ::-webkit-scrollbar { width: 4px; height: 4px; }
   ::-webkit-scrollbar-track { background: transparent; }
   ::-webkit-scrollbar-thumb { background: var(--bg4); border-radius: 2px; }
+
+  /* ─── Skill tooltip ──────────────────────────────────── */
+  #skill-tooltip {
+    position: fixed;
+    z-index: 2000;
+    background: var(--bg2);
+    border: 1px solid var(--accent);
+    border-radius: 6px;
+    padding: 8px 12px;
+    font-size: 11px;
+    color: var(--text);
+    max-width: 260px;
+    line-height: 1.6;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.12s;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.5);
+  }
+  #skill-tooltip.visible { opacity: 1; }
+  #skill-tooltip .tip-name {
+    color: var(--accent);
+    font-weight: 700;
+    font-size: 10px;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    margin-bottom: 4px;
+  }
+  #skill-tooltip .tip-desc { color: var(--text2); }
+  .member-type { cursor: help; }
+
+  /* ─── UI Polish Enhancements ─────────────────────────── */
+
+  /* Logo: subtle pulse glow on hexagon icon */
+  #header .logo-icon {
+    color: var(--accent);
+    filter: drop-shadow(0 0 5px rgba(88,166,255,0.35));
+    animation: logoPulse 4s ease-in-out infinite;
+  }
+  @keyframes logoPulse {
+    0%, 100% { filter: drop-shadow(0 0 4px rgba(88,166,255,0.25)); }
+    50%       { filter: drop-shadow(0 0 10px rgba(88,166,255,0.55)); }
+  }
+
+  /* Header: gradient accent border-bottom */
+  #header {
+    border-bottom: 1px solid transparent;
+    background: linear-gradient(var(--bg2), var(--bg2)) padding-box,
+                linear-gradient(90deg,
+                  var(--border) 0%,
+                  rgba(88,166,255,0.35) 35%,
+                  rgba(188,140,255,0.35) 65%,
+                  var(--border) 100%) border-box;
+  }
+
+  /* Team-tabs: style the no-active-teams hint spans */
+  #team-tabs > span:first-child {
+    font-size: 11px;
+    color: var(--text3);
+    padding: 0 6px;
+    font-style: italic;
+  }
+  #team-tabs > span + span {
+    font-size: 10px;
+    color: var(--text3);
+    opacity: 0.55;
+    font-style: italic;
+    letter-spacing: 0.01em;
+  }
+
+  /* Panel headers: colored left accent bar */
+  .panel-header {
+    padding-left: 16px;
+    position: relative;
+  }
+  .panel-header::before {
+    content: '';
+    position: absolute;
+    left: 0; top: 50%;
+    transform: translateY(-50%);
+    width: 2px; height: 55%;
+    border-radius: 1px;
+    background: var(--accent);
+    opacity: 0.6;
+  }
+  #panel-tasks .panel-header::before { background: var(--yellow); }
+  #panel-feed  .panel-header::before { background: var(--purple); }
+  #panel-terminal .panel-header::before { background: var(--green); }
+
+  /* No-team overlay: radial glow + polished cmd hint */
+  #no-team-overlay {
+    background: radial-gradient(ellipse 60% 40% at 50% 50%,
+      rgba(88,166,255,0.04) 0%, transparent 70%), var(--bg);
+  }
+  #no-team-overlay .overlay-icon {
+    font-size: 40px;
+    opacity: 0.25;
+    color: var(--accent);
+    filter: drop-shadow(0 0 14px rgba(88,166,255,0.4));
+  }
+  #no-team-overlay .overlay-title {
+    font-size: 14px;
+    font-weight: 600;
+    letter-spacing: 0.01em;
+    color: var(--text2);
+  }
+  #no-team-overlay .hint-cmd {
+    border-color: rgba(88,166,255,0.35);
+    box-shadow: 0 0 14px rgba(88,166,255,0.08), inset 0 1px 0 rgba(88,166,255,0.08);
+    transition: box-shadow 0.2s, border-color 0.2s;
+    cursor: default;
+  }
+
+  /* Stats bar: slightly more contrast on values */
+  .stat-val { color: var(--text); font-weight: 600; }
+  .stat-key { text-transform: uppercase; letter-spacing: 0.04em; font-size: 10px; }
+
+  /* Member cards: colored left edge on select/hover */
+  .member-card { border-left: 2px solid transparent; padding-left: 9px; }
+  .member-card:hover   { border-left-color: rgba(88,166,255,0.5); }
+  .member-card.selected { border-left-color: var(--accent); }
+
+  /* Task column top borders by status */
+  .col-pending  .task-card { border-top: 2px solid rgba(139,148,158,0.25); }
+  .col-progress .task-card { border-top: 2px solid rgba(210,153,34,0.45); }
+  .col-done     .task-card { border-top: 2px solid rgba(63,185,80,0.45); }
+
+  /* Feed items: tighter border, better content indent */
+  .feed-item { padding: 7px 0; }
+  .feed-content {
+    border-left: 2px solid rgba(88,166,255,0.2);
+    padding-left: 8px;
+    margin-top: 4px;
+    line-height: 1.6;
+  }
+
+  /* Terminal: subtle scanlines atmosphere */
+  #terminal-output { position: relative; }
+  #terminal-output::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: repeating-linear-gradient(
+      0deg,
+      transparent 0px,
+      transparent 2px,
+      rgba(0,0,0,0.04) 2px,
+      rgba(0,0,0,0.04) 4px
+    );
+    pointer-events: none;
+    z-index: 0;
+  }
+  #term-pre { position: relative; z-index: 1; }
+
+  /* Buttons: subtle bg on hover */
+  #history-btn:hover,
+  #refresh-btn:hover,
+  #skills-btn:hover { background: rgba(88,166,255,0.07); }
+
+  /* Skills panel: hint box */
+  .skills-hint-box {
+    margin: 6px 10px 2px;
+    padding: 8px 11px;
+    background: rgba(88,166,255,0.05);
+    border: 1px solid rgba(88,166,255,0.14);
+    border-radius: 5px;
+    flex-shrink: 0;
+    line-height: 1.6;
+  }
+  .skills-hint-primary {
+    font-size: 11px;
+    color: var(--text2);
+    font-weight: 500;
+    margin-bottom: 3px;
+  }
+  .skills-hint-secondary {
+    font-size: 10px;
+    color: var(--text3);
+  }
+
+  /* Scrollbar: slightly thinner */
+  ::-webkit-scrollbar { width: 3px; height: 3px; }
+  ::-webkit-scrollbar-thumb { background: rgba(48,54,61,0.9); }
 </style>
 </head>
 <body>
@@ -401,6 +838,9 @@
     Claude Team Monitor
   </div>
   <div id="team-tabs"></div>
+  <button id="refresh-btn" onclick="doRefresh()" title="새로고침">↻ 새로고침</button>
+  <button id="skills-btn" onclick="toggleSkills()" title="플러그인 스킬">⬡ 플러그인 스킬</button>
+  <button id="history-btn" onclick="toggleHistory()" title="히스토리">◷ 히스토리</button>
   <div id="conn-status">
     <div id="conn-dot"></div>
     <span id="conn-label">connecting…</span>
@@ -410,6 +850,14 @@
 
 <!-- Main grid -->
 <div id="main">
+  <!-- No teams overlay -->
+  <div id="no-team-overlay">
+    <div class="overlay-icon">⬡</div>
+    <div class="overlay-title">현재 실행 중인 팀이 없습니다</div>
+    <div class="hint-cmd">/oh-my-claudecode:team</div>
+    <div class="overlay-sub">새 팀을 시작하면 자동으로 감지됩니다</div>
+  </div>
+
   <!-- Left: Members -->
   <div class="panel" id="panel-team">
     <div class="panel-header">
@@ -481,7 +929,39 @@
   <span class="stat-sep">|</span>
   <span class="stat-item"><span class="stat-key">Tasks:</span><span class="stat-val" id="st-tasks">0</span></span>
   <span class="stat-sep">|</span>
+  <span class="stat-item" id="st-session-wrap" style="display:none"><span class="stat-key">최근 세션:</span><span class="stat-val" id="st-session">–</span></span>
+  <span class="stat-sep" id="st-session-sep" style="display:none">|</span>
   <span id="st-tools" style="display:flex;gap:8px;align-items:center;flex-wrap:wrap"></span>
+</div>
+
+<div id="skill-tooltip"><div class="tip-name"></div><div class="tip-desc"></div></div>
+
+<div id="skills-panel">
+  <div class="skills-header">
+    <span>플러그인 스킬</span>
+    <span id="skills-count" style="color:var(--text3);font-size:10px"></span>
+  </div>
+  <div class="skills-hint-box">
+    <div class="skills-hint-primary">.claude 내에 설치된 모든 플러그인 스킬의 설명을 보여줍니다</div>
+    <div class="skills-hint-secondary">새 플러그인 설치 후 패널을 닫았다 다시 열면 자동 갱신됩니다</div>
+  </div>
+  <div class="skills-filter-bar">
+    <button id="teams-filter-btn" class="skills-filter-btn" onclick="toggleTeamsFilter()">⬡ Teams만 보기</button>
+  </div>
+  <input id="skills-search" type="text" placeholder="스킬 검색…" oninput="filterSkills(this.value)">
+  <div class="skills-list" id="skills-list"></div>
+</div>
+
+<div id="history-panel">
+  <div class="history-header">
+    <span>Team History</span>
+    <span id="history-count" style="color:var(--text3);font-size:10px"></span>
+  </div>
+  <div class="history-list" id="history-list"></div>
+  <div class="history-footer">
+    <button class="history-action-btn" onclick="doRefresh()">↻ 새로고침</button>
+    <button class="history-action-btn danger" onclick="clearAllHistory()">✕ 전체 초기화</button>
+  </div>
 </div>
 
 <script>
@@ -548,6 +1028,7 @@ function handleMsg({ type, data }) {
       renderTeamTabs();
       renderMembers();
       renderStats();
+      if (historyOpen) renderHistory();
       break;
     case 'tasks':
       S.tasks = data;
@@ -586,17 +1067,30 @@ function renderAll() {
 
 function renderTeamTabs() {
   const el = document.getElementById('team-tabs');
+  const main = document.getElementById('main');
   const names = Object.keys(S.teams);
+
+  if (names.length === 0) {
+    el.innerHTML = '<span style="color:var(--text3);font-size:11px;padding:0 8px">No active teams</span><span style="color:var(--text3);font-size:10px;padding:0 4px;opacity:0.6">— Agent Teams 기능을 사용하는 스킬이 실행될 때만 표시됩니다</span>';
+    main.classList.add('no-teams');
+    return;
+  }
+  main.classList.remove('no-teams');
+
   el.innerHTML = names.map(name => {
     const t = S.teams[name];
     const active = name === S.selectedTeam ? 'active' : '';
     const memberCount = (t.members || []).length;
-    return `<button class="team-tab ${active}" onclick="selectTeam('${esc(name)}')">${esc(name)} <span style="opacity:0.5;font-size:10px">(${memberCount})</span></button>`;
+    const createdAt = t.createdAt ? new Date(t.createdAt).getTime() : 0;
+    const isLive = createdAt && (Date.now() - createdAt) < 2 * 60 * 60 * 1000;
+    const badge = isLive
+      ? `<span class="badge-live"><span class="live-dot"></span>LIVE</span>`
+      : `<span class="badge-ended">종료</span>`;
+    const endedClass = isLive ? '' : 'ended';
+    const info = getTeamSkillInfo(name);
+    const tipAttr = info ? `data-team-tip="${esc(info.command)}" data-team-desc="${esc(info.desc)}"` : '';
+    return `<button class="team-tab ${active} ${endedClass}" onclick="selectTeam('${esc(name)}')" ${tipAttr}>${esc(name)} <span style="opacity:0.5;font-size:10px">(${memberCount})</span>${badge}</button>`;
   }).join('');
-
-  if (names.length === 0) {
-    el.innerHTML = '<span style="color:var(--text3);font-size:11px;padding:0 8px">No active teams</span>';
-  }
 }
 
 function selectTeam(name) {
@@ -632,7 +1126,7 @@ function renderMembers() {
         <div class="member-name">
           <span class="member-dot ${dotClass}"></span>
           ${esc(m.name)}
-          <span class="member-type">${isLead ? 'lead' : esc(m.agentType || 'agent')}</span>
+          <span class="member-type" data-skill="${isLead ? 'lead' : esc(m.agentType || 'agent')}">${isLead ? 'lead' : esc(m.agentType || 'agent')}</span>
         </div>
         <div class="member-meta">${esc(m.model || '–')}</div>
         ${hasPane}
@@ -655,8 +1149,21 @@ function selectAgent(agentId, paneId, teamName) {
       ws.send(JSON.stringify({ action: 'captureTmux', payload: { paneId, agentId, teamName } }));
     }
   } else {
-    document.getElementById('term-pre').textContent = 'No tmux pane assigned to this agent.';
-    document.getElementById('term-pre').className = 'term-no-pane';
+    const pre = document.getElementById('term-pre');
+    const team = S.teams[S.selectedTeam];
+    const member = team && (team.members || []).find(m => m.agentId === agentId);
+    const isLead = member && (member.agentType === 'team-lead' || agentId === (team && team.leadAgentId));
+    const isActive = member && member.isActive;
+    if (isLead) {
+      pre.className = 'term-status-msg';
+      pre.innerHTML = '<span class="status-title">⬡ team-lead — 현재 세션에서 직접 실행 중</span><span class="status-reason">Claude Code 세션 내에서 실행되므로 tmux pane이 없습니다.<br>터미널 캡처를 지원하지 않습니다.</span>';
+    } else if (!isActive) {
+      pre.className = 'term-status-msg';
+      pre.innerHTML = '<span class="status-title">에이전트 종료됨</span><span class="status-reason">팀이 완료되었거나 중단된 상태입니다.<br>pane이 닫혀 터미널 기록을 볼 수 없습니다.</span>';
+    } else {
+      pre.className = 'term-no-pane';
+      pre.textContent = 'No tmux pane assigned to this agent.';
+    }
   }
 }
 
@@ -775,7 +1282,22 @@ function renderStats() {
   const sessionIds = Object.keys(sessions);
   if (sessionIds.length === 0) return;
   const latest = sessions[sessionIds[sessionIds.length - 1]];
-  if (!latest || !latest.tool_counts) return;
+  if (!latest) return;
+
+  // Session start time
+  const sessionWrap = document.getElementById('st-session-wrap');
+  const sessionSep  = document.getElementById('st-session-sep');
+  if (latest.started_at) {
+    const startD = new Date(latest.started_at);
+    const isToday = startD.toDateString() === new Date().toDateString();
+    const dateStr = isToday ? '오늘' : startD.toLocaleDateString('ko', { month: 'short', day: 'numeric' });
+    const timeStr = startD.toLocaleTimeString('ko', { hour: '2-digit', minute: '2-digit' });
+    document.getElementById('st-session').textContent = `${dateStr} ${timeStr}`;
+    sessionWrap.style.display = '';
+    sessionSep.style.display = '';
+  }
+
+  if (!latest.tool_counts) return;
   const tc = latest.tool_counts;
   const toolEl = document.getElementById('st-tools');
   toolEl.innerHTML = Object.entries(tc)
@@ -804,8 +1326,434 @@ function setLastUpdate(ts) {
   el.textContent = d.toLocaleTimeString('ko', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
 }
 
+// ─── History panel ────────────────────────────────────────────────────────────
+let historyOpen = false;
+
+function toggleHistory() {
+  historyOpen = !historyOpen;
+  document.getElementById('history-panel').classList.toggle('open', historyOpen);
+  document.getElementById('history-btn').classList.toggle('active', historyOpen);
+  if (historyOpen) renderHistory();
+}
+
+function renderHistory() {
+  const el = document.getElementById('history-list');
+  const now = Date.now();
+  const ended = Object.entries(S.teams)
+    .filter(([, t]) => !t.createdAt || (now - t.createdAt) >= 2 * 60 * 60 * 1000)
+    .sort((a, b) => (b[1].createdAt || 0) - (a[1].createdAt || 0));
+
+  document.getElementById('history-count').textContent = ended.length + '개';
+
+  if (ended.length === 0) {
+    el.innerHTML = '<div style="color:var(--text3);font-size:11px;padding:20px;text-align:center">종료된 팀이 없습니다</div>';
+    return;
+  }
+
+  el.innerHTML = ended.map(([name, t]) => {
+    const created = t.createdAt ? new Date(t.createdAt) : null;
+    const dateStr = created
+      ? created.toLocaleDateString('ko', { month: 'short', day: 'numeric' }) + ' ' +
+        created.toLocaleTimeString('ko', { hour: '2-digit', minute: '2-digit' })
+      : '날짜 없음';
+    const memberCount = (t.members || []).length;
+    return `
+      <div class="history-item">
+        <div class="history-item-info">
+          <div class="history-item-name" title="${esc(name)}">${esc(name)}</div>
+          <div class="history-item-meta">${dateStr} · ${memberCount}명</div>
+        </div>
+        <button class="history-del-btn" onclick="deleteTeam('${esc(name)}')">삭제</button>
+      </div>`;
+  }).join('');
+}
+
+async function deleteTeam(name) {
+  if (!confirm(`"${name}" 팀 데이터를 삭제하시겠습니까?`)) return;
+  try {
+    const r = await fetch(`/api/teams/${encodeURIComponent(name)}`, { method: 'DELETE' });
+    if (!r.ok) throw new Error('서버 오류');
+  } catch (e) {
+    alert('삭제 실패: ' + e.message);
+  }
+}
+
+async function clearAllHistory() {
+  const now = Date.now();
+  const ended = Object.keys(S.teams)
+    .filter(n => !S.teams[n].createdAt || (now - S.teams[n].createdAt) >= 2 * 60 * 60 * 1000);
+  if (ended.length === 0) { alert('삭제할 종료 팀이 없습니다.'); return; }
+  if (!confirm(`종료된 팀 ${ended.length}개를 모두 삭제하시겠습니까?`)) return;
+  for (const name of ended) {
+    try {
+      await fetch(`/api/teams/${encodeURIComponent(name)}`, { method: 'DELETE' });
+    } catch {}
+  }
+}
+
+async function doRefresh() {
+  const btn = document.getElementById('refresh-btn');
+  btn.classList.add('spinning');
+  btn.disabled = true;
+  try {
+    await fetch('/api/refresh', { method: 'POST' });
+  } catch {
+    alert('새로고침 실패');
+  } finally {
+    setTimeout(() => { btn.classList.remove('spinning'); btn.disabled = false; }, 800);
+  }
+}
+
+// ─── Skill descriptions ───────────────────────────────────────────────────────
+const SKILL_DESC = {
+  // 기본 에이전트 타입
+  'lead':                 '팀 리더 — 전체 작업을 오케스트레이션하고 서브에이전트에 작업을 위임합니다',
+  'agent':                '일반 에이전트',
+  'Bash':                 'Bash 명령 실행 전문가 — git, npm, docker 등 터미널 작업을 처리합니다',
+  'general-purpose':      '범용 에이전트 — 복잡한 질문 조사, 코드 탐색, 멀티스텝 작업을 처리합니다',
+  'Explore':              '코드베이스 탐색 전문가 — 파일 패턴 검색, 키워드 탐색, 구조 분석을 빠르게 수행합니다',
+  'Plan':                 '소프트웨어 아키텍트 — 구현 계획 설계, 핵심 파일 파악, 아키텍처 트레이드오프를 분석합니다',
+  'claude-code-guide':    'Claude Code 가이드 — CLI 기능, 플러그인, MCP 서버, 설정, API 사용법을 안내합니다',
+  'statusline-setup':     'Claude Code 상태표시줄 설정 에이전트',
+  // oh-my-claudecode — 핵심 실행
+  'team-lead':            '팀 리더 — 전체 작업을 오케스트레이션하고 서브에이전트에 작업을 위임합니다',
+  'executor':             '실행 전문가 — 구체적인 구현 작업을 집중 수행합니다 (Sonnet)',
+  'deep-executor':        '자율 심층 실행 에이전트 — 복잡한 목표 지향 작업을 자율적으로 처리합니다 (Opus)',
+  'planner':              '전략 기획 컨설턴트 — 인터뷰 워크플로우로 구현 계획을 수립합니다 (Opus)',
+  'analyst':              '사전 기획 컨설턴트 — 요구사항을 분석합니다 (Opus)',
+  'critic':               '작업 계획 검토 전문가 (Opus)',
+  // oh-my-claudecode — 코드 품질
+  'architect':            '아키텍처 어드바이저 — 전략적 설계 및 디버깅 자문 (읽기 전용, Opus)',
+  'debugger':             '근본 원인 분석 — 회귀 격리 및 스택 트레이스 분석',
+  'build-fixer':          '빌드 오류 해결 전문가 — 컴파일 에러를 최소 변경으로 수정합니다',
+  'code-reviewer':        '코드 리뷰 전문가 — 심각도 등급 기반 피드백을 제공합니다',
+  'quality-reviewer':     '품질 검토 — 로직 결함, 유지보수성, 안티패턴, SOLID 원칙 검토',
+  'quality-strategist':   '품질 전략, 릴리스 준비 상태, 위험 평가 및 품질 게이트 (Sonnet)',
+  'style-reviewer':       '포맷팅, 네이밍 규칙, 관용구, lint/스타일 컨벤션 검토',
+  'api-reviewer':         'API 계약, 하위 호환성, 버전 관리, 오류 시맨틱 검토',
+  // oh-my-claudecode — 테스트 / 보안
+  'test-engineer':        '테스트 전략가 — 통합/E2E 커버리지 및 TDD 워크플로우',
+  'security-reviewer':    '보안 취약점 탐지 — OWASP Top 10 기반 보안 검사',
+  'performance-reviewer': '성능 분석 — 핫스팟, 알고리즘 복잡도, 메모리/레이턴시 분석',
+  'qa-tester':            '인터랙티브 CLI 테스트 전문가 — tmux 세션 관리 기반',
+  'verifier':             '검증 전략가 — 증거 기반 완료 확인 및 테스트 적절성 평가',
+  // oh-my-claudecode — 설계 / 문서
+  'designer':             'UI/UX 디자이너 — 멋진 인터페이스를 설계합니다 (Sonnet)',
+  'writer':               '기술 문서 작성 전문가 — README, API 문서, 주석 작성 (Haiku)',
+  'information-architect':'정보 구조, 분류체계, 네비게이션 모델 설계 (Sonnet)',
+  'document-specialist':  '외부 문서 및 참조 전문가',
+  'ux-researcher':        '사용성 연구, 휴리스틱 감사, 사용자 증거 합성 (Sonnet)',
+  'vision':               '시각/미디어 파일 분석기 — 이미지, PDF, 다이어그램 분석 (Sonnet)',
+  // oh-my-claudecode — 기타
+  'git-master':           'Git 전문가 — 원자적 커밋, 리베이스, 히스토리 관리 (스타일 자동 감지)',
+  'explore':              '코드베이스 검색 전문가 — 파일 및 코드 패턴을 탐색합니다',
+  'scientist':            '데이터 분석 및 연구 실행 전문가',
+  'dependency-expert':    '외부 SDK/API/패키지 평가 전문가',
+  'product-manager':      '문제 프레이밍, 가치 가설, 우선순위 결정, PRD 생성 (Sonnet)',
+  'product-analyst':      '제품 지표, 이벤트 스키마, 퍼널 분석 (Sonnet)',
+  // playwright-test-v2
+  'test-lead':            '테스트 팀 리더 — 전체 테스트 오케스트레이션 및 최종 리포트 생성',
+  'page-explorer':        '페이지 탐색 전문가 — 웹 앱 전체 구조를 파악하고 페이지맵을 생성합니다',
+  'functional-tester':    '기능 테스트 전문가 — 모든 UI 인터랙션을 지능적으로 테스트합니다',
+  'visual-inspector':     '시각/접근성 전문가 — UI/UX, 반응형 디자인, 접근성을 검사합니다',
+  'api-interceptor':      'API/네트워크 전문가 — 네트워크 트래픽 분석 및 API 검증',
+  'perf-auditor':         '성능 감사 전문가 — Core Web Vitals 측정 및 성능 등급 평가',
+  // session-wrap
+  'doc-updater':          '문서 업데이트 분석 — CLAUDE.md 및 context.md 업데이트 필요 사항 분석',
+  'automation-scout':     '자동화 패턴 분석 — 반복 작업 자동화 기회를 탐색합니다',
+  'learning-extractor':   '학습 추출 — TIL 형식으로 새로운 발견과 학습을 요약합니다',
+  'followup-suggester':   '후속 작업 제안 — 미완료 작업 및 개선 포인트를 파악합니다',
+  'duplicate-checker':    '중복 검증 — Phase 1 분석 결과의 중복 여부를 검증합니다',
+  // tdd-clean-planner
+  'arch-designer':        'Clean Architecture 설계 — 4레이어 구조, SOLID 원칙, 포트-어댑터 패턴 기반 아키텍처 설계',
+  'checklist-builder':    '구현 체크리스트 — Inside-Out 구현 순서, 레이어별 Red-Green-Refactor, DoD 기반 체크리스트 생성',
+  'domain-analyst':       'DDD 도메인 분석 — Aggregate, Value Object, Bounded Context, Domain Event 기반 도메인 모델 설계',
+  'tdd-strategist':       'TDD 테스트 전략 — Red-Green-Refactor 사이클, Given/When/Then, 테스트 피라미드, Mock 전략 설계',
+  // dev plugin
+  'codebase-explorer':    '코드베이스 탐색 에이전트 (dev 플러그인)',
+  'decision-synthesizer': '기술 결정 합성 에이전트 (dev 플러그인)',
+  'docs-researcher':      '문서 조사 에이전트 (dev 플러그인)',
+  'tradeoff-analyzer':    '트레이드오프 분석 에이전트 (dev 플러그인)',
+};
+
+function getSkillDesc(agentType) {
+  if (!agentType) return null;
+  if (SKILL_DESC[agentType]) return SKILL_DESC[agentType];
+  const bare = agentType.split(':').pop();
+  return SKILL_DESC[bare] || null;
+}
+
+// ─── Dynamic plugin data ──────────────────────────────────────────────────────
+let pluginData = { commands: [], agents: [] };
+
+async function loadPlugins() {
+  try {
+    const countEl = document.getElementById('skills-count');
+    if (skillsOpen && countEl) countEl.textContent = '로딩…';
+    const r = await fetch('/api/plugins');
+    pluginData = await r.json();
+    // Rebuild agent desc map from live data
+    pluginData.agents.forEach(a => {
+      const key = a.name;
+      if (key && a.description) SKILL_DESC[key] = a.description;
+    });
+    if (skillsOpen) renderSkills(document.getElementById('skills-search').value || '');
+  } catch {}
+}
+
+// ─── Team orchestrator skill descriptions (fallback) ─────────────────────────
+const TEAM_SKILLS = [
+  {
+    command: '/oh-my-claudecode:team',
+    patterns: ['team'],
+    desc: '범용 멀티 에이전트 팀 — lead가 작업을 분석하고 전문 서브에이전트들에게 분배·오케스트레이션합니다',
+    group: 'oh-my-claudecode'
+  },
+  {
+    command: '/oh-my-claudecode:swarm',
+    patterns: ['swarm'],
+    desc: '스웜(군집) 모드 — 여러 에이전트가 독립적으로 병렬 처리하여 대규모 작업을 빠르게 완료합니다',
+    group: 'oh-my-claudecode'
+  },
+  {
+    command: '/oh-my-claudecode:ultrapilot',
+    patterns: ['ultrapilot'],
+    desc: '자율 울트라 파이프라인 — 분석→설계→실행→검증 전 단계를 자동화하는 심층 작업 모드입니다',
+    group: 'oh-my-claudecode'
+  },
+  {
+    command: '/oh-my-claudecode:ultrawork',
+    patterns: ['ultrawork'],
+    desc: '복잡한 개발 작업을 전문 에이전트 팀이 단계별로 분업 처리합니다',
+    group: 'oh-my-claudecode'
+  },
+  {
+    command: '/oh-my-claudecode:ultraqa',
+    patterns: ['ultraqa'],
+    desc: 'Ultra QA — 코드 품질, 보안, 성능, 테스트를 전문 에이전트들이 병렬로 종합 검사합니다',
+    group: 'oh-my-claudecode'
+  },
+  {
+    command: '/oh-my-claudecode:code-review',
+    patterns: ['code-review', 'code_review'],
+    desc: '멀티 관점 코드 리뷰 — 품질·보안·성능·스타일 전문 에이전트가 각각 리뷰 후 통합 리포트를 생성합니다',
+    group: 'oh-my-claudecode'
+  },
+  {
+    command: '/oh-my-claudecode:plan',
+    patterns: ['plan'],
+    desc: '전략적 구현 계획 수립 — 요구사항 분석부터 단계별 실행 계획까지 전문 에이전트가 작성합니다',
+    group: 'oh-my-claudecode'
+  },
+  {
+    command: '/oh-my-claudecode:tdd',
+    patterns: ['tdd'],
+    desc: 'TDD 워크플로우 — Red→Green→Refactor 사이클을 에이전트 팀이 자동 진행합니다',
+    group: 'oh-my-claudecode'
+  },
+  {
+    command: '/oh-my-claudecode:review',
+    patterns: ['review'],
+    desc: '종합 코드 검토 — 아키텍처, 로직, 보안, 성능을 다각도로 분석합니다',
+    group: 'oh-my-claudecode'
+  },
+  {
+    command: '/oh-my-claudecode:analyze',
+    patterns: ['analyze'],
+    desc: '코드베이스 심층 분석 — 구조, 의존성, 개선점을 전문 에이전트가 종합 분석합니다',
+    group: 'oh-my-claudecode'
+  },
+  {
+    command: '/oh-my-claudecode:pipeline',
+    patterns: ['pipeline'],
+    desc: '커스텀 에이전트 파이프라인 — 작업 단계를 정의하고 전문 에이전트를 순차/병렬 실행합니다',
+    group: 'oh-my-claudecode'
+  },
+  {
+    command: '/playwright-test-v2:playwright-test',
+    patterns: ['playwright', 'playwright-test'],
+    desc: '웹 앱 종합 테스트 — 6개 전문 에이전트(페이지 탐색·기능·시각·API·성능)가 팀을 구성해 자동 테스트합니다',
+    group: 'playwright-test-v2'
+  },
+  {
+    command: '/tdd-clean-planner:tdd-plan',
+    patterns: ['tdd-plan', 'tdd-clean', 'tdd_plan'],
+    desc: 'TDD + Clean Architecture 계획 — 도메인 분석·아키텍처 설계·테스트 전략·체크리스트를 4개 에이전트가 병렬 수립합니다',
+    group: 'tdd-clean-planner'
+  },
+  {
+    command: '/session-wrap:session-wrap',
+    patterns: ['session-wrap', 'wrap', 'session_wrap'],
+    desc: '세션 마무리 — 문서 업데이트, 학습 추출, 자동화 기회, 후속 작업을 에이전트 팀이 정리합니다',
+    group: 'session-wrap'
+  },
+  {
+    command: '/dev:dev-scan',
+    patterns: ['dev-scan', 'dev_scan'],
+    desc: '개발 코드베이스 스캔 — 구조 탐색, 기술 결정 분석, 문서 조사를 병렬로 수행합니다',
+    group: 'dev'
+  },
+  {
+    command: '/dev:tech-decision',
+    patterns: ['tech-decision', 'tech_decision'],
+    desc: '기술 의사결정 분석 — 트레이드오프를 다각도로 분석하여 최적 기술 선택을 지원합니다',
+    group: 'dev'
+  },
+  {
+    command: '/agent-council:agent-council',
+    patterns: ['council', 'agent-council'],
+    desc: '에이전트 협의회 — 복잡한 결정 사항을 여러 전문 에이전트가 토론·합의하여 최적 방안을 도출합니다',
+    group: 'agent-council'
+  },
+];
+
+function getTeamSkillInfo(teamName) {
+  if (!teamName) return null;
+  const lower = teamName.toLowerCase();
+  // Try live plugin data first
+  const live = pluginData.commands.find(c =>
+    lower.includes(c.name.toLowerCase()) || lower.includes(c.plugin.toLowerCase())
+  );
+  if (live) return { command: live.command, desc: live.description };
+  // Fallback to hardcoded
+  const fallback = TEAM_SKILLS.find(s => s.patterns.some(p => lower.includes(p)));
+  return fallback ? { command: fallback.command, desc: fallback.desc } : null;
+}
+
+// ─── Skills panel ────────────────────────────────────────────────────────────
+
+let skillsOpen = false;
+let teamsFilterOn = false;
+
+function isTeamSkill(command) {
+  const lower = command.toLowerCase();
+  return TEAM_SKILLS.some(s => s.patterns.some(p => lower.includes(p)));
+}
+
+function toggleTeamsFilter() {
+  teamsFilterOn = !teamsFilterOn;
+  const btn = document.getElementById('teams-filter-btn');
+  if (btn) btn.classList.toggle('active', teamsFilterOn);
+  renderSkills(document.getElementById('skills-search').value || '');
+}
+
+function toggleSkills() {
+  skillsOpen = !skillsOpen;
+  document.getElementById('skills-panel').classList.toggle('open', skillsOpen);
+  document.getElementById('skills-btn').classList.toggle('active', skillsOpen);
+  if (skillsOpen) loadPlugins();
+}
+
+function renderSkills(query) {
+  const el = document.getElementById('skills-list');
+  const q = query.toLowerCase().trim();
+
+  // Use live plugin data if available, else fallback to hardcoded
+  const source = pluginData.commands.length > 0
+    ? pluginData.commands.map(c => ({ command: c.command, desc: c.description, group: c.plugin }))
+    : TEAM_SKILLS.map(s => ({ command: s.command, desc: s.desc, group: s.group }));
+
+  let filtered = source.filter(s =>
+    !q || s.command.toLowerCase().includes(q) || s.desc.toLowerCase().includes(q) || s.group.toLowerCase().includes(q)
+  );
+  if (teamsFilterOn) filtered = filtered.filter(s => isTeamSkill(s.command));
+
+  // Group by plugin
+  const groups = {};
+  filtered.forEach(s => {
+    if (!groups[s.group]) groups[s.group] = [];
+    groups[s.group].push(s);
+  });
+
+  let html = '';
+  Object.entries(groups).forEach(([group, skills]) => {
+    html += `<div class="skills-group-title">${esc(group)}</div>`;
+    skills.forEach(s => {
+      const id = 'cp-' + Math.random().toString(36).slice(2, 8);
+      const teamBadge = isTeamSkill(s.command) ? '<span class="skill-team-badge">⬡ team</span>' : '';
+      html += `<div class="skill-item">
+        <div class="skill-item-name">
+          <span>${esc(s.command)}${teamBadge}</span>
+          <button class="skill-copy-btn" id="${id}" onclick="copySkillCmd('${esc(s.command)}','${id}')">복사</button>
+        </div>
+        <div class="skill-item-desc">${esc(s.desc)}</div>
+      </div>`;
+    });
+  });
+
+  el.innerHTML = html || '<div style="color:var(--text3);font-size:11px;padding:16px;text-align:center">검색 결과 없음</div>';
+  document.getElementById('skills-count').textContent = filtered.length + '개';
+}
+
+function copySkillCmd(cmd, btnId) {
+  navigator.clipboard.writeText(cmd).then(() => {
+    const btn = document.getElementById(btnId);
+    if (!btn) return;
+    btn.textContent = '✓';
+    btn.classList.add('copied');
+    setTimeout(() => { btn.textContent = '복사'; btn.classList.remove('copied'); }, 1500);
+  }).catch(() => {});
+}
+
+function filterSkills(val) {
+  renderSkills(val);
+}
+
+// ─── Tooltip ──────────────────────────────────────────────────────────────────
+const tooltip = document.getElementById('skill-tooltip');
+const tipName = tooltip.querySelector('.tip-name');
+const tipDesc = tooltip.querySelector('.tip-desc');
+
+function showSkillTooltip(el, skill, desc) {
+  tipName.textContent = skill;
+  tipDesc.textContent = desc;
+  tooltip.classList.add('visible');
+  positionTooltip(el);
+}
+
+function hideSkillTooltip() {
+  tooltip.classList.remove('visible');
+}
+
+function positionTooltip(el) {
+  const r = el.getBoundingClientRect();
+  const tw = 260, th = 80;
+  let left = r.left;
+  let top = r.bottom + 6;
+  if (left + tw > window.innerWidth - 8) left = window.innerWidth - tw - 8;
+  if (top + th > window.innerHeight - 8) top = r.top - th - 6;
+  tooltip.style.left = left + 'px';
+  tooltip.style.top = top + 'px';
+}
+
+// Team tab tooltips
+document.getElementById('team-tabs').addEventListener('mouseover', e => {
+  const tab = e.target.closest('.team-tab');
+  if (!tab || !tab.dataset.teamTip) return;
+  tipName.textContent = tab.dataset.teamTip;
+  tipDesc.textContent = tab.dataset.teamDesc || '';
+  tooltip.classList.add('visible');
+  positionTooltip(tab);
+});
+document.getElementById('team-tabs').addEventListener('mouseout', e => {
+  if (e.target.closest('.team-tab')) hideSkillTooltip();
+});
+
+document.getElementById('member-list').addEventListener('mouseover', e => {
+  const badge = e.target.closest('.member-type');
+  if (!badge) return;
+  const skill = badge.dataset.skill || '';
+  const desc = getSkillDesc(skill);
+  if (desc) showSkillTooltip(badge, skill, desc);
+});
+
+document.getElementById('member-list').addEventListener('mouseout', e => {
+  if (e.target.closest('.member-type')) hideSkillTooltip();
+});
+
 // ─── Boot ─────────────────────────────────────────────────────────────────────
 connect();
+loadPlugins();
 </script>
 </body>
 </html>
