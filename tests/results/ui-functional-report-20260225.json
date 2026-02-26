@@ -1,0 +1,30 @@
+{
+  "reportDate": "2026-02-25T14:30:00.000Z",
+  "testArea": "UI & Functional Testing",
+  "method": "Source code static analysis + live API verification",
+  "summary": {"total": 12, "pass": 10, "fail": 2, "grade": "B+"},
+  "tests": [
+    {"id": "UI01", "test": "Page title 'Claude Team Monitor'", "pass": true, "location": "index.html:6", "note": "<title>Claude Team Monitor</title>"},
+    {"id": "UI02", "test": "WebSocket auto-reconnect (3s)", "pass": true, "location": "index.html:955", "note": "setTimeout(connect, 3000) on disconnect"},
+    {"id": "UI03", "test": "Team tabs dynamic rendering", "pass": true, "location": "index.html", "note": "renderTeamTabs() function found, handles LIVE/종료 badges"},
+    {"id": "UI04", "test": "Member panel lead/sub role distinction", "pass": true, "location": "index.html", "note": "isLead/role logic present in renderMembers()"},
+    {"id": "UI05", "test": "Kanban 3-column (Pending/In Progress/Done)", "pass": true, "location": "index.html", "note": "3-column grid layout with task status filtering"},
+    {"id": "UI06", "test": "Activity feed item limit", "pass": true, "location": "index.html:938", "note": "feedItems array initialized; DOM management present"},
+    {"id": "UI07", "test": "Terminal tab switching on member click", "pass": true, "location": "index.html", "note": "member-card onclick switches terminal tab"},
+    {"id": "UI08", "test": "Plugin panel search functionality", "pass": true, "location": "index.html:912", "note": "<input id='skills-search' oninput='filterSkills()'>"},
+    {"id": "UI09", "test": "Teams filter button", "pass": true, "location": "index.html:910", "note": "<button id='teams-filter-btn' onclick='toggleTeamsFilter()'>"},
+    {"id": "UI10", "test": "History panel slide toggle", "pass": true, "location": "index.html:809", "note": "toggleHistory() function, 320px slide-out panel"},
+    {"id": "UI11-F16", "test": "[이전실패] Team delete confirm() → custom modal", "pass": false, "location": "index.html:1337", "note": "STILL uses browser confirm() — not replaced with custom modal", "severity": "low"},
+    {"id": "UI12-F17", "test": "[이전실패] History clear confirm() → custom modal", "pass": false, "location": "index.html:1351", "note": "STILL uses browser confirm() — not replaced with custom modal", "severity": "low"}
+  ],
+  "regressionCheck": {
+    "F16_teamDelete": "UNCHANGED — confirm() still used at line 1337",
+    "F17_historyClear": "UNCHANGED — confirm() still used at line 1351",
+    "F18_paneIdValidation": "IMPROVED — dual validation at lines 188 and 248"
+  },
+  "notes": [
+    "Core UI features all functional",
+    "2 known failures (F16, F17) from previous report remain unresolved",
+    "Recommend replacing confirm() with custom modal for automation testability"
+  ]
+}

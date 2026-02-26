@@ -52,8 +52,47 @@ function readTeams() {
   const teams = {};
   try {
     fs.readdirSync(TEAMS_DIR).forEach(name => {
-      const config = readJson(path.join(TEAMS_DIR, name, 'config.json'));
-      if (config) teams[name] = config;
+      const teamDir = path.join(TEAMS_DIR, name);
+      let dirStat;
+      try { dirStat = fs.statSync(teamDir); } catch { return; }
+      if (!dirStat.isDirectory()) return;
+
+      let config = readJson(path.join(teamDir, 'config.json'));
+
+      if (!config) {
+        // omc 팀: config.json 없음 → inboxes 기반 합성
+        const inboxesDir = path.join(teamDir, 'inboxes');
+        const members = [];
+        if (fs.existsSync(inboxesDir)) {
+          try {
+            fs.readdirSync(inboxesDir)
+              .filter(f => f.endsWith('.json'))
+              .forEach(f => {
+                const agentId = f.replace('.json', '');
+                let isActive = false;
+                try {
+                  const s = fs.statSync(path.join(inboxesDir, f));
+                  isActive = (Date.now() - s.mtimeMs) < 5 * 60 * 1000;
+                } catch {}
+                members.push({
+                  agentId,
+                  name: agentId.split('@')[0],
+                  agentType: 'worker',
+                  isActive,
+                  tmuxPaneId: ''
+                });
+              });
+          } catch {}
+        }
+        config = {
+          name,
+          description: 'omc worker team',
+          createdAt: dirStat.birthtimeMs || dirStat.mtimeMs,
+          members
+        };
+      }
+
+      teams[name] = config;
     });
   } catch {}
   state.teams = teams;
@@ -70,8 +109,41 @@ function readMessages(teamName) {
   }
 }
 
+function readInboxMessages(teamName) {
+  const inboxesDir = path.join(TEAMS_DIR, teamName, 'inboxes');
+  if (!fs.existsSync(inboxesDir)) return;
+  const messages = [];
+  try {
+    fs.readdirSync(inboxesDir)
+      .filter(f => f.endsWith('.json'))
+      .forEach(f => {
+        const recipient = f.replace('.json', '');
+        const data = readJson(path.join(inboxesDir, f));
+        if (!Array.isArray(data)) return;
+        data.forEach(msg => {
+          let parsed = {};
+          try { parsed = JSON.parse(msg.text || '{}'); } catch {}
+          messages.push({
+            from: msg.from || parsed.from || '?',
+            to: recipient,
+            content: parsed.content || parsed.idleReason || msg.text || '',
+            type: parsed.type || 'message',
+            timestamp: msg.timestamp || parsed.timestamp,
+            color: msg.color
+          });
+        });
+      });
+  } catch {}
+  messages.sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp));
+  state.messages[teamName] = messages;
+  broadcast('messages', { teamName, messages });
+}
+
 function readAllMessages() {
-  Object.keys(state.teams).forEach(readMessages);
+  Object.keys(state.teams).forEach(name => {
+    readMessages(name);
+    readInboxMessages(name);
+  });
 }
 
 function readTasks() {
@@ -137,7 +209,7 @@ function pollAllTmux() {
 // ─── File watchers ───────────────────────────────────────────────────────────
 
 function setupWatchers() {
-  const watchOpts = { depth: 2, ignoreInitial: false, awaitWriteFinish: { stabilityThreshold: 200 } };
+  const watchOpts = { depth: 3, ignoreInitial: false, awaitWriteFinish: { stabilityThreshold: 200 } };
 
   if (fs.existsSync(TEAMS_DIR)) {
     chokidar.watch(TEAMS_DIR, watchOpts).on('all', (event, filePath) => {
@@ -146,6 +218,13 @@ function setupWatchers() {
       } else if (filePath.endsWith('messages.json')) {
         const teamName = path.basename(path.dirname(filePath));
         setTimeout(() => readMessages(teamName), 150);
+      } else if (filePath.includes('/inboxes/') && filePath.endsWith('.json')) {
+        const parts = filePath.split(path.sep);
+        const teamsIdx = parts.lastIndexOf('teams');
+        if (teamsIdx >= 0 && parts[teamsIdx + 1]) {
+          const teamName = parts[teamsIdx + 1];
+          setTimeout(() => { readTeams(); readInboxMessages(teamName); }, 150);
+        }
       }
     });
   }
@@ -187,10 +266,30 @@ function parseFrontmatter(content) {
   const match = content.match(/^---\n([\s\S]*?)\n---/);
   if (!match) return {};
   const result = {};
-  match[1].split('\n').forEach(line => {
+  const lines = match[1].split('\n');
+  let blockKey = null;
+  let blockLines = [];
+  for (const line of lines) {
+    if (blockKey !== null) {
+      if (/^ {2}/.test(line)) {
+        blockLines.push(line.trim());
+        continue;
+      } else {
+        result[blockKey] = blockLines.join(' ').trim();
+        blockKey = null;
+        blockLines = [];
+      }
+    }
+    const blockScalar = line.match(/^(\w[\w-]*):\s*[|>]\s*$/);
+    if (blockScalar) {
+      blockKey = blockScalar[1];
+      blockLines = [];
+      continue;
+    }
     const m = line.match(/^(\w[\w-]*):\s*"?(.+?)"?\s*$/);
     if (m) result[m[1]] = m[2];
-  });
+  }
+  if (blockKey !== null) result[blockKey] = blockLines.join(' ').trim();
   return result;
 }
 

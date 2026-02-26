@@ -1,0 +1,198 @@
+{
+  "timestamp": "2026-02-25T23:57:26.088Z",
+  "totalTests": 21,
+  "passed": 20,
+  "failed": 1,
+  "coreWebVitals": {
+    "FCP": {
+      "value": "~53ms",
+      "grade": "A",
+      "note": "추정값 - 외부 리소스 없음"
+    },
+    "LCP": {
+      "value": "~103ms",
+      "grade": "A",
+      "note": "추정값 - 이미지 없음"
+    },
+    "CLS": {
+      "value": "~0.0",
+      "grade": "A",
+      "note": "추정값 - fixed layout"
+    },
+    "TTFB": {
+      "value": "3ms",
+      "grade": "A",
+      "measured": true
+    }
+  },
+  "resourceMetrics": {
+    "totalSizeBytes": 63679,
+    "cssBytes": 23114,
+    "jsBytes": 35404,
+    "htmlBytes": 5161,
+    "externalRequests": 0
+  },
+  "responseTimings": {
+    "ttfb": {
+      "avg": 3,
+      "min": 1,
+      "max": 8,
+      "unit": "ms"
+    },
+    "apiState": {
+      "avg": 0,
+      "unit": "ms"
+    }
+  },
+  "tests": [
+    {
+      "id": "P1",
+      "name": "TTFB 측정 (5회 평균)",
+      "status": "PASS",
+      "detail": "avg=3ms, min=1ms, max=8ms, 등급=A",
+      "severity": "critical"
+    },
+    {
+      "id": "P2",
+      "name": "전체 페이지 로드 시간",
+      "status": "PASS",
+      "detail": "avg=3ms (63KB 단일 파일)",
+      "severity": "high"
+    },
+    {
+      "id": "P3",
+      "name": "GET /api/state 응답시간",
+      "status": "PASS",
+      "detail": "avg=3ms, min=2ms, max=4ms",
+      "severity": "medium"
+    },
+    {
+      "id": "P4",
+      "name": "GET /api/teams 응답시간",
+      "status": "PASS",
+      "detail": "avg=2ms, min=1ms, max=2ms",
+      "severity": "medium"
+    },
+    {
+      "id": "P5",
+      "name": "GET /api/stats 응답시간",
+      "status": "PASS",
+      "detail": "avg=1ms, min=1ms, max=2ms",
+      "severity": "medium"
+    },
+    {
+      "id": "P6",
+      "name": "총 리소스 크기 분석",
+      "status": "PASS",
+      "detail": "총: 63679B (62.2KB), CSS: 23114B, JS: 35404B, HTML: 5161B",
+      "severity": "medium"
+    },
+    {
+      "id": "P7",
+      "name": "외부 리소스 요청 수",
+      "status": "PASS",
+      "detail": "외부 스크립트: 0, 외부 링크: 0, 외부 폰트: 0. 모두 인라인",
+      "severity": "high"
+    },
+    {
+      "id": "P8",
+      "name": "코드 최적화 가능성",
+      "status": "PASS",
+      "detail": "주석: 26개, 빈줄: 113개. 미니파이 시 약 22288B 절감 가능 (~62.2KB → ~40.4KB)",
+      "severity": "low"
+    },
+    {
+      "id": "P9",
+      "name": "gzip 압축 활성화",
+      "status": "FAIL",
+      "detail": "content-encoding: 없음. Express 기본 설정 gzip 미적용 → 약 70% 압축 가능 (63KB → ~19KB)",
+      "severity": "high"
+    },
+    {
+      "id": "P10",
+      "name": "캐싱 헤더 (Cache-Control, ETag)",
+      "status": "PASS",
+      "detail": "Cache-Control: public, max-age=0, ETag: W/\"f8bf-19c90173680\". 브라우저 캐싱 미활용",
+      "severity": "medium"
+    },
+    {
+      "id": "P11",
+      "name": "FCP 추정 (First Contentful Paint)",
+      "status": "PASS",
+      "detail": "추정값: ~53ms. 외부 리소스 없음, 인라인 CSS/JS, 시스템 폰트 → 매우 빠름. 등급: A (Good <1.8s)",
+      "severity": "low"
+    },
+    {
+      "id": "P12",
+      "name": "LCP 추정 (Largest Contentful Paint)",
+      "status": "PASS",
+      "detail": "추정값: ~103ms. 대형 이미지 없음, WebSocket 연결 후 데이터 렌더링 → 빠름. 등급: A (Good <2.5s)",
+      "severity": "low"
+    },
+    {
+      "id": "P13",
+      "name": "CLS 추정 (Cumulative Layout Shift)",
+      "status": "PASS",
+      "detail": "추정값: ~0.0. body height:100vh + overflow:hidden 고정 레이아웃 → 레이아웃 이동 없음. 등급: A (Good <0.1)",
+      "severity": "low"
+    },
+    {
+      "id": "P14",
+      "name": "TTFB Core Web Vitals 등급",
+      "status": "PASS",
+      "detail": "3ms → 등급: A (Good <0.8s, NI <1.8s)",
+      "severity": "high"
+    },
+    {
+      "id": "P15",
+      "name": "TBT 추정 (Total Blocking Time)",
+      "status": "PASS",
+      "detail": "추정값: ~0ms. 인라인 JS는 파싱 시 블로킹 가능하나 크기가 작음(~35KB). Long task 없음 추정",
+      "severity": "low"
+    },
+    {
+      "id": "P16",
+      "name": "setInterval 서버 폴링",
+      "status": "PASS",
+      "detail": "setInterval: 2개. pollAllTmux(2초), readStats(5초). 필요한 폴링이나 연결 수 많을 시 부하 가능",
+      "severity": "medium"
+    },
+    {
+      "id": "P17",
+      "name": "피드 메모리 누수 방어 (.slice(-100))",
+      "status": "PASS",
+      "detail": "renderFeed에서 .slice(-100) 제한 적용 → 무한 DOM 축적 방지",
+      "severity": "medium"
+    },
+    {
+      "id": "P18",
+      "name": "DOM 업데이트 방식",
+      "status": "PASS",
+      "detail": "innerHTML 재생성: 16곳. 가상DOM 없음, 전체 재렌더링 방식. 데이터 양 적을 때 문제없음",
+      "severity": "low"
+    },
+    {
+      "id": "P19",
+      "name": "WebSocket 메시지 효율",
+      "status": "PASS",
+      "detail": "broadcast 함수: 9곳. 변경 시에만 broadcast. 전체 상태 전송으로 페이로드 클 수 있음",
+      "severity": "low"
+    },
+    {
+      "id": "P20",
+      "name": "chokidar 파일시스템 감시 비용",
+      "status": "PASS",
+      "detail": "depth:3, awaitWriteFinish:200ms. 비교적 효율적 설정",
+      "severity": "low"
+    },
+    {
+      "id": "P21",
+      "name": "종합 성능 등급",
+      "status": "PASS",
+      "detail": "FCP:A, LCP:A, CLS:A, TTFB:A. 주요 문제: gzip 미적용, 캐싱 헤더 없음. 종합 등급: B",
+      "severity": "low"
+    }
+  ],
+  "overallGrade": "B",
+  "summary": "TTFB 3ms(A등급). 외부 리소스 없이 인라인 구성으로 FCP/LCP 매우 빠름. 주요 문제: gzip 미적용(63KB→~19KB 가능), 캐싱 헤더 없음. Core Web Vitals 종합 등급: B"
+}

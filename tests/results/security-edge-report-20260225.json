@@ -1,0 +1,99 @@
+{
+  "reportDate": "2026-02-25T14:30:00.000Z",
+  "testArea": "Security & Edge Case Testing",
+  "summary": {"total": 9, "pass": 6, "fail": 3, "grade": "C+"},
+  "securityTests": [
+    {
+      "id": "SEC01",
+      "test": "API Authentication — DELETE /api/teams/:name",
+      "severity": "HIGH",
+      "pass": false,
+      "result": "HTTP 200 returned without any authentication",
+      "detail": "curl -X DELETE http://localhost:9099/api/teams/any-name returns 200. No auth header required. Any local process can delete team data.",
+      "recommendation": "Add API key header check or local-only binding (127.0.0.1)"
+    },
+    {
+      "id": "SEC02",
+      "test": "tmux paneId regex sanitization",
+      "severity": "MEDIUM",
+      "pass": true,
+      "result": "Regex /^[%\\w:.]+$/ correctly blocks injection",
+      "detail": "Valid: '%0', 'window.pane' → allowed. Invalid: \"'; rm -rf /; '\", '%0\\ncat /etc/passwd' → blocked. Server survives all injection attempts.",
+      "location": "server.js:188, server.js:248",
+      "note": "Dual validation applied correctly"
+    },
+    {
+      "id": "SEC03",
+      "test": "exec() vs execFile() for tmux commands",
+      "severity": "MEDIUM",
+      "pass": false,
+      "result": "Uses exec() with string interpolation (line 189, 249)",
+      "detail": "exec(`tmux capture-pane -t ${paneId} -p -S -80`) — while regex filters input, execFile() with array args would be safer",
+      "location": "server.js:7,189,249",
+      "recommendation": "Replace exec() with execFile('tmux', ['capture-pane', '-t', paneId, '-p', '-S', '-80'])"
+    },
+    {
+      "id": "SEC04",
+      "test": "CORS headers configuration",
+      "severity": "MEDIUM",
+      "pass": false,
+      "result": "No Access-Control-Allow-Origin headers in response",
+      "detail": "curl -H 'Origin: http://evil.com' returns no CORS headers. While this means browsers will block cross-origin requests by default, explicit CORS policy is missing.",
+      "recommendation": "Add explicit CORS: either restrict to localhost or add cors middleware"
+    },
+    {
+      "id": "SEC05",
+      "test": "Sensitive data in /api/state",
+      "severity": "LOW",
+      "pass": false,
+      "result": "User home directory paths exposed",
+      "detail": "/api/state response contains paths like /Users/gwanli/.claude/teams/... This reveals username and filesystem structure to any local client.",
+      "recommendation": "Sanitize paths in API response or restrict to localhost only"
+    },
+    {
+      "id": "SEC06",
+      "test": "Invalid WebSocket message handling",
+      "severity": "LOW",
+      "pass": true,
+      "result": "Server handles unknown actions gracefully",
+      "detail": "Sending {action:'unknownAction'} via WebSocket does not crash the server. Server remains alive and responsive."
+    },
+    {
+      "id": "SEC07",
+      "test": "3 simultaneous WebSocket connections",
+      "severity": "INFO",
+      "pass": true,
+      "result": "All 3 connections receive broadcast correctly",
+      "detail": "No connection limit enforced. All simultaneous clients receive snapshot, teams, tasks broadcasts."
+    },
+    {
+      "id": "SEC08",
+      "test": "Empty state graceful handling (~/.claude/teams/ missing)",
+      "severity": "LOW",
+      "pass": true,
+      "result": "Code has try-catch with empty fallbacks",
+      "detail": "readTeams() uses try-catch returning {} on error. Server won't crash if ~/.claude/teams/ doesn't exist.",
+      "location": "server.js (readTeams, readTasks functions)"
+    },
+    {
+      "id": "SEC09",
+      "test": "Server alive after all attack attempts",
+      "severity": "INFO",
+      "pass": true,
+      "result": "Server remained stable throughout all tests",
+      "detail": "After injection attempts, invalid WS messages, concurrent connections — /api/state still returns 200"
+    }
+  ],
+  "summary_findings": {
+    "critical": 0,
+    "high": 1,
+    "medium": 2,
+    "low": 2,
+    "info": 2
+  },
+  "topIssues": [
+    "[HIGH] No API authentication — DELETE endpoint unprotected",
+    "[MEDIUM] exec() with string interpolation instead of execFile() array args",
+    "[MEDIUM] No explicit CORS policy configured"
+  ]
+}

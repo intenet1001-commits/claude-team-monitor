@@ -426,18 +426,6 @@
     text-align: center;
   }
   #main.no-teams #no-team-overlay { display: flex; }
-  #no-team-overlay .overlay-icon { font-size: 32px; opacity: 0.4; }
-  #no-team-overlay .overlay-title { font-size: 14px; color: var(--text2); }
-  #no-team-overlay .overlay-sub { font-size: 11px; color: var(--text3); }
-  #no-team-overlay .hint-cmd {
-    font-size: 12px;
-    color: var(--accent);
-    background: var(--bg3);
-    padding: 6px 14px;
-    border-radius: 4px;
-    border: 1px solid var(--border);
-    font-family: var(--font-mono);
-  }
 
   /* ─── Stats bar ──────────────────────────────────────── */
   #stats-bar {
@@ -733,29 +721,6 @@
   #panel-feed  .panel-header::before { background: var(--purple); }
   #panel-terminal .panel-header::before { background: var(--green); }
 
-  /* No-team overlay: radial glow + polished cmd hint */
-  #no-team-overlay {
-    background: radial-gradient(ellipse 60% 40% at 50% 50%,
-      rgba(88,166,255,0.04) 0%, transparent 70%), var(--bg);
-  }
-  #no-team-overlay .overlay-icon {
-    font-size: 40px;
-    opacity: 0.25;
-    color: var(--accent);
-    filter: drop-shadow(0 0 14px rgba(88,166,255,0.4));
-  }
-  #no-team-overlay .overlay-title {
-    font-size: 14px;
-    font-weight: 600;
-    letter-spacing: 0.01em;
-    color: var(--text2);
-  }
-  #no-team-overlay .hint-cmd {
-    border-color: rgba(88,166,255,0.35);
-    box-shadow: 0 0 14px rgba(88,166,255,0.08), inset 0 1px 0 rgba(88,166,255,0.08);
-    transition: box-shadow 0.2s, border-color 0.2s;
-    cursor: default;
-  }
 
   /* Stats bar: slightly more contrast on values */
   .stat-val { color: var(--text); font-weight: 600; }
@@ -827,6 +792,7 @@
   /* Scrollbar: slightly thinner */
   ::-webkit-scrollbar { width: 3px; height: 3px; }
   ::-webkit-scrollbar-thumb { background: rgba(48,54,61,0.9); }
+
 </style>
 </head>
 <body>
@@ -851,12 +817,7 @@
 <!-- Main grid -->
 <div id="main">
   <!-- No teams overlay -->
-  <div id="no-team-overlay">
-    <div class="overlay-icon">⬡</div>
-    <div class="overlay-title">현재 실행 중인 팀이 없습니다</div>
-    <div class="hint-cmd">/oh-my-claudecode:team</div>
-    <div class="overlay-sub">새 팀을 시작하면 자동으로 감지됩니다</div>
-  </div>
+  <div id="no-team-overlay"></div>
 
   <!-- Left: Members -->
   <div class="panel" id="panel-team">
@@ -1288,7 +1249,8 @@ function renderStats() {
   const sessionWrap = document.getElementById('st-session-wrap');
   const sessionSep  = document.getElementById('st-session-sep');
   if (latest.started_at) {
-    const startD = new Date(latest.started_at);
+    // started_at is Unix seconds — multiply by 1000 for JS Date
+    const startD = new Date(latest.started_at * 1000);
     const isToday = startD.toDateString() === new Date().toDateString();
     const dateStr = isToday ? '오늘' : startD.toLocaleDateString('ko', { month: 'short', day: 'numeric' });
     const timeStr = startD.toLocaleTimeString('ko', { hour: '2-digit', minute: '2-digit' });
@@ -1299,12 +1261,15 @@ function renderStats() {
 
   if (!latest.tool_counts) return;
   const tc = latest.tool_counts;
+
+  // Bottom stats bar
   const toolEl = document.getElementById('st-tools');
   toolEl.innerHTML = Object.entries(tc)
     .sort((a, b) => b[1] - a[1])
     .slice(0, 8)
     .map(([k, v]) => `<span class="stat-item"><span class="stat-key">${esc(k.replace(/^mcp__.*__/, ''))}</span><span class="stat-val">${v}</span></span>`)
     .join('<span class="stat-sep">·</span>');
+
 }
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────

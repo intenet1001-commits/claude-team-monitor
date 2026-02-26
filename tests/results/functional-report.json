@@ -1,0 +1,150 @@
+{
+  "timestamp": "2026-02-25T23:06:32.892Z",
+  "totalTests": 20,
+  "passed": 16,
+  "failed": 4,
+  "passRate": "80%",
+  "tests": [
+    {
+      "id": "F1",
+      "name": "GET /api/state → 200",
+      "status": "PASS",
+      "detail": "status=200, time=8ms, size=47322bytes",
+      "severity": "critical"
+    },
+    {
+      "id": "F2",
+      "name": "GET /api/teams → 200",
+      "status": "PASS",
+      "detail": "status=200, time=1ms",
+      "severity": "critical"
+    },
+    {
+      "id": "F3",
+      "name": "GET /api/tasks → 200",
+      "status": "PASS",
+      "detail": "status=200, time=0ms",
+      "severity": "high"
+    },
+    {
+      "id": "F4",
+      "name": "GET /api/stats → 200",
+      "status": "PASS",
+      "detail": "status=200, time=1ms",
+      "severity": "medium"
+    },
+    {
+      "id": "F5",
+      "name": "GET /api/plugins → {commands, agents}",
+      "status": "PASS",
+      "detail": "commands=916, agents=31",
+      "severity": "medium"
+    },
+    {
+      "id": "F6",
+      "name": "POST /api/refresh → {ok:true}",
+      "status": "PASS",
+      "detail": "status=200, body={\"ok\":true}",
+      "severity": "high"
+    },
+    {
+      "id": "F7",
+      "name": "/api/state 필수 필드 완전성",
+      "status": "PASS",
+      "detail": "모든 필드 존재: teams, tasks, messages, stats, tmuxOutputs",
+      "severity": "high"
+    },
+    {
+      "id": "F8",
+      "name": "/api/teams 팀 객체 구조 검증",
+      "status": "PASS",
+      "detail": "팀 수: 4, name=true, members=true, createdAt=true",
+      "severity": "medium"
+    },
+    {
+      "id": "F9",
+      "name": "/api/tasks 응답 형식 확인",
+      "status": "PASS",
+      "detail": "프로젝트 수: 17",
+      "severity": "medium"
+    },
+    {
+      "id": "F10",
+      "name": "/api/stats sessions 필드 존재",
+      "status": "PASS",
+      "detail": "세션 수: 123",
+      "severity": "medium"
+    },
+    {
+      "id": "F11",
+      "name": "/api/plugins commands+agents 배열",
+      "status": "PASS",
+      "detail": "commands: 916, agents: 31",
+      "severity": "low"
+    },
+    {
+      "id": "F12",
+      "name": "refresh 후 /api/state 정상 응답",
+      "status": "PASS",
+      "detail": "status=200",
+      "severity": "medium"
+    },
+    {
+      "id": "F13",
+      "name": "없는 경로 → 404 또는 SPA fallback",
+      "status": "PASS",
+      "detail": "status=404 (Express 정적파일 서빙: index.html fallback)",
+      "severity": "low"
+    },
+    {
+      "id": "F14",
+      "name": "DELETE 없는 팀 → 200 (graceful)",
+      "status": "PASS",
+      "detail": "status=200, body={\"ok\":true}",
+      "severity": "low"
+    },
+    {
+      "id": "F15",
+      "name": "잘못된 JSON POST → 에러 없이 처리",
+      "status": "PASS",
+      "detail": "status=200",
+      "severity": "medium"
+    },
+    {
+      "id": "F16",
+      "name": "deleteTeam() confirm() 대화상자 사용",
+      "status": "FAIL",
+      "detail": "confirm() 호출 2곳 발견. deleteTeam에서 confirm() 사용 중 - 브라우저 native dialog로 자동화 방해",
+      "severity": "medium"
+    },
+    {
+      "id": "F17",
+      "name": "clearAllHistory() confirm() 대화상자 사용",
+      "status": "FAIL",
+      "detail": "clearAllHistory에서도 confirm() 사용 중. 총 2개 confirm() 호출. 위치: deleteTeam(), clearAllHistory()",
+      "severity": "medium"
+    },
+    {
+      "id": "F18",
+      "name": "tmux paneId 서버측 sanitize 검증",
+      "status": "PASS",
+      "detail": "captureTmuxPane: /^[%\\w:.]+$/ 정규식 적용. captureTmux WS action: /[^%\\w:.]/.test() 적용. paneId 참조 9곳",
+      "severity": "high"
+    },
+    {
+      "id": "F19",
+      "name": "DELETE /api/teams/:name 인증 없이 접근",
+      "status": "FAIL",
+      "detail": "인증 헤더 없이 status=400 반환 - 보안 취약점: 누구나 팀 삭제 가능",
+      "severity": "critical"
+    },
+    {
+      "id": "F20",
+      "name": "POST /api/refresh 인증 없이 접근",
+      "status": "FAIL",
+      "detail": "인증 헤더 없이 status=200 반환 - 보안 취약점: 누구나 강제 새로고침 가능",
+      "severity": "high"
+    }
+  ],
+  "summary": "총 20개 테스트 중 16개 통과, 4개 실패. 주요 이슈: confirm() 대화상자 사용(F16/F17), API 인증 없음(F19/F20). tmux paneId 검증은 서버측에 있음(F18 PASS)."
+}

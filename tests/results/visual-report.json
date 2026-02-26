@@ -1,0 +1,204 @@
+{
+  "timestamp": "2026-02-25T23:07:08.714Z",
+  "totalTests": 23,
+  "passed": 12,
+  "failed": 11,
+  "wcagViolations": 6,
+  "responsiveIssues": 4,
+  "tests": [
+    {
+      "id": "V1",
+      "name": "DOCTYPE, lang=\"ko\" 존재",
+      "status": "PASS",
+      "detail": "DOCTYPE: ✓, lang=\"ko\": ✓",
+      "severity": "medium"
+    },
+    {
+      "id": "V2",
+      "name": "meta charset, viewport 존재",
+      "status": "PASS",
+      "detail": "charset=UTF-8 ✓, viewport meta ✓",
+      "severity": "high"
+    },
+    {
+      "id": "V3",
+      "name": "시맨틱 HTML 사용",
+      "status": "FAIL",
+      "detail": "div 남용: 69개. <header>, <main>, <nav>, <section> 미사용. 모두 <div id=\"...\">로 구현",
+      "severity": "medium"
+    },
+    {
+      "id": "V4",
+      "name": "페이지 타이틀 적절성",
+      "status": "PASS",
+      "detail": "title: \"Claude Team Monitor\"",
+      "severity": "low"
+    },
+    {
+      "id": "V5",
+      "name": "이미지 alt 텍스트",
+      "status": "PASS",
+      "detail": "이미지 태그 0개 (없음 - 이모지/텍스트만 사용)",
+      "severity": "medium"
+    },
+    {
+      "id": "V6",
+      "name": "버튼 aria-label 또는 title 존재",
+      "status": "PASS",
+      "detail": "aria-label: 0개, title: 4개. #refresh-btn, #skills-btn, #history-btn에 title 속성 존재",
+      "severity": "high"
+    },
+    {
+      "id": "V7",
+      "name": "색상 대비 WCAG AA (4.5:1)",
+      "status": "FAIL",
+      "detail": "--text on --bg: 16.02:1 ✓; --text2 on --bg: 6.15:1 ✓; --text3 on --bg: 4.12:1 ✗ FAIL; --text3 on --bg2: 3.77:1 ✗ FAIL; --accent on --bg: 7.49:1 ✓",
+      "severity": "high"
+    },
+    {
+      "id": "V8",
+      "name": "포커스 가시성 (:focus 스타일)",
+      "status": "PASS",
+      "detail": ":focus 스타일 존재 (skills-search:focus)",
+      "severity": "high"
+    },
+    {
+      "id": "V9",
+      "name": "키보드 접근성 (div onclick 남용)",
+      "status": "FAIL",
+      "detail": "div onclick: 1개 (member-card, task-card), button: 10개. member-card가 div+onclick으로 구현 - 키보드 접근 불가",
+      "severity": "high"
+    },
+    {
+      "id": "V10",
+      "name": "ARIA 속성 사용",
+      "status": "FAIL",
+      "detail": "aria-* 속성: 0개, role: 0개. 대부분 미사용 - 스크린리더 지원 부족",
+      "severity": "high"
+    },
+    {
+      "id": "V11",
+      "name": "#skills-search input label 연결",
+      "status": "FAIL",
+      "detail": "skills-search input 존재: true, 연결된 <label>: false - label 없음",
+      "severity": "medium"
+    },
+    {
+      "id": "V12",
+      "name": "스크린리더 접근성 (aria-live 등)",
+      "status": "FAIL",
+      "detail": "aria-hidden: false, aria-live: false. 실시간 업데이트 영역에 aria-live 없음 - 스크린리더 미지원",
+      "severity": "high"
+    },
+    {
+      "id": "V13",
+      "name": "viewport meta 태그",
+      "status": "PASS",
+      "detail": "content=\"width=device-width, initial-scale=1.0\" ✓",
+      "severity": "medium"
+    },
+    {
+      "id": "V14",
+      "name": "CSS media query 존재",
+      "status": "FAIL",
+      "detail": "@media 쿼리: 0개 (prefers-reduced-motion 등 없음)",
+      "severity": "high"
+    },
+    {
+      "id": "V15",
+      "name": "모바일(375px) 레이아웃",
+      "status": "FAIL",
+      "detail": "body: height:100vh; overflow:hidden + grid-template-columns: 220px 1fr 300px → 모바일에서 레이아웃 깨짐. 반응형 미지원 (의도적 설계)",
+      "severity": "high"
+    },
+    {
+      "id": "V16",
+      "name": "태블릿(768px) 레이아웃",
+      "status": "FAIL",
+      "detail": "grid 고정 컬럼(220px+300px)으로 768px에서 중앙 패널 너비 부족. team-tabs는 overflow-x:auto로 스크롤 가능",
+      "severity": "medium"
+    },
+    {
+      "id": "V17",
+      "name": "CSS 애니메이션 존재",
+      "status": "PASS",
+      "detail": "livePulse, logoPulse 등 @keyframes 애니메이션 존재",
+      "severity": "low"
+    },
+    {
+      "id": "V18",
+      "name": "prefers-reduced-motion 지원",
+      "status": "FAIL",
+      "detail": "prefers-reduced-motion 미지원. 애니메이션 비선호 사용자 배려 없음",
+      "severity": "medium"
+    },
+    {
+      "id": "V19",
+      "name": "커스텀 스크롤바 스타일",
+      "status": "PASS",
+      "detail": "::-webkit-scrollbar 커스텀 스타일 ✓",
+      "severity": "low"
+    },
+    {
+      "id": "V20",
+      "name": "디자인 시스템 일관성",
+      "status": "PASS",
+      "detail": "var(--*) CSS 변수 191회 사용. 일관된 다크 테마 적용",
+      "severity": "low"
+    },
+    {
+      "id": "V21",
+      "name": "--text on --bg 대비",
+      "status": "PASS",
+      "detail": "#e6edf3 on #0d1117 = 16.02:1 (AA 통과, AAA 통과)",
+      "severity": "low"
+    },
+    {
+      "id": "V22",
+      "name": "--text2 on --bg 대비",
+      "status": "PASS",
+      "detail": "#8b949e on #0d1117 = 6.15:1 (AA 통과)",
+      "severity": "medium"
+    },
+    {
+      "id": "V23",
+      "name": "--text3 on --bg 대비 (소형 텍스트)",
+      "status": "FAIL",
+      "detail": "#6e7681 on #0d1117 = 4.12:1 (AA 실패) - 10-11px 소형 텍스트에 사용됨",
+      "severity": "high"
+    }
+  ],
+  "colorContrast": [
+    {
+      "pair": "--text on --bg",
+      "ratio": 16.02,
+      "wcagAA": true,
+      "wcagAAA": true
+    },
+    {
+      "pair": "--text2 on --bg",
+      "ratio": 6.15,
+      "wcagAA": true,
+      "wcagAAA": false
+    },
+    {
+      "pair": "--text3 on --bg",
+      "ratio": 4.12,
+      "wcagAA": false,
+      "wcagAAA": false
+    },
+    {
+      "pair": "--text3 on --bg2",
+      "ratio": 3.77,
+      "wcagAA": false,
+      "wcagAAA": false
+    },
+    {
+      "pair": "--accent on --bg",
+      "ratio": 7.49,
+      "wcagAA": true,
+      "wcagAAA": true
+    }
+  ],
+  "summary": "총 23개 검사 중 12개 통과, 11개 실패. WCAG 위반 6개: div onclick 키보드 접근성, --text3 색상 대비 미달, aria-live 없음, 포커스 일부 미지원. 반응형 이슈 4개: 고정 그리드로 모바일 미지원."
+}

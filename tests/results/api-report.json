@@ -1,0 +1,193 @@
+{
+  "timestamp": "2026-02-25T23:57:21.543Z",
+  "totalTests": 23,
+  "passed": 20,
+  "failed": 3,
+  "securityIssues": 3,
+  "tests": [
+    {
+      "id": "A1",
+      "name": "GET /api/state 가용성",
+      "status": "PASS",
+      "detail": "status=200, time=9ms, size=47322B",
+      "responseTime": 9,
+      "severity": "critical"
+    },
+    {
+      "id": "A2",
+      "name": "GET /api/teams 가용성",
+      "status": "PASS",
+      "detail": "status=200, time=1ms, size=1423B, teams=4",
+      "responseTime": 1,
+      "severity": "critical"
+    },
+    {
+      "id": "A3",
+      "name": "GET /api/tasks 가용성",
+      "status": "PASS",
+      "detail": "status=200, time=1ms, size=11444B, projects=17",
+      "responseTime": 1,
+      "severity": "critical"
+    },
+    {
+      "id": "A4",
+      "name": "GET /api/stats 가용성",
+      "status": "PASS",
+      "detail": "status=200, time=0ms, size=27892B, sessions=123",
+      "responseTime": 0,
+      "severity": "critical"
+    },
+    {
+      "id": "A5",
+      "name": "GET /api/plugins 가용성",
+      "status": "PASS",
+      "detail": "status=200, time=146ms, size=253212B, commands=916, agents=31",
+      "responseTime": 146,
+      "severity": "critical"
+    },
+    {
+      "id": "A6",
+      "name": "POST /api/refresh 가용성",
+      "status": "PASS",
+      "detail": "status=200, body={\"ok\":true}, time=9ms",
+      "responseTime": 9,
+      "severity": "high"
+    },
+    {
+      "id": "A7",
+      "name": "DELETE /api/teams/:name 없는 팀 처리",
+      "status": "PASS",
+      "detail": "status=200, time=0ms",
+      "responseTime": 0,
+      "severity": "medium"
+    },
+    {
+      "id": "A8",
+      "name": "DELETE /api/teams/:name 인증 필요 여부",
+      "status": "FAIL",
+      "detail": "인증 없이 status=200 반환. 인증/인가 없음 - 보안 취약점",
+      "responseTime": 1,
+      "severity": "critical"
+    },
+    {
+      "id": "A9",
+      "name": "POST /api/refresh 인증 필요 여부",
+      "status": "FAIL",
+      "detail": "인증 없이 status=200 반환. 누구나 강제 새로고침 가능",
+      "responseTime": 2,
+      "severity": "high"
+    },
+    {
+      "id": "A10",
+      "name": "Path traversal 방어 (path.basename)",
+      "status": "PASS",
+      "detail": "path.basename(req.params.name) 사용: true. ../../ 등 경로 탐색 공격 방어",
+      "severity": "high"
+    },
+    {
+      "id": "A11",
+      "name": "HTTP 보안 헤더",
+      "status": "FAIL",
+      "detail": "누락: x-frame-options, x-content-type-options, content-security-policy, x-xss-protection, strict-transport-security. 모든 보안 헤더 없음",
+      "severity": "high"
+    },
+    {
+      "id": "A12",
+      "name": "CORS 설정",
+      "status": "PASS",
+      "detail": "Access-Control-Allow-Origin: 미설정 (localhost 전용으로 기본 안전)",
+      "severity": "medium"
+    },
+    {
+      "id": "A13",
+      "name": "WebSocket 연결 및 snapshot 이벤트",
+      "status": "PASS",
+      "detail": "connection 핸들러: true, snapshot 브로드캐스트: true",
+      "severity": "high"
+    },
+    {
+      "id": "A14",
+      "name": "WebSocket snapshot 이벤트 구조",
+      "status": "PASS",
+      "detail": "연결 시 전체 state snapshot 전송 확인",
+      "severity": "medium"
+    },
+    {
+      "id": "A15",
+      "name": "WebSocket captureTmux paneId sanitize",
+      "status": "PASS",
+      "detail": "/[^%\\w:.]/.test(paneId) 검증 적용. Shell injection 방어",
+      "severity": "high"
+    },
+    {
+      "id": "A16",
+      "name": "WebSocket 자동 재연결 (3초)",
+      "status": "PASS",
+      "detail": "setTimeout(connect, 3000) 재연결 로직 존재",
+      "severity": "medium"
+    },
+    {
+      "id": "A17",
+      "name": "/api/state ts timestamp 필드",
+      "status": "PASS",
+      "detail": "REST /api/state: ts 없음 (WS 메시지에 ts 포함). Content-Type: application/json; charset=utf-8",
+      "severity": "low"
+    },
+    {
+      "id": "A18",
+      "name": "/api/state 응답 구조 완전성",
+      "status": "PASS",
+      "detail": "모든 필드 존재: teams, tasks, messages, stats, tmuxOutputs",
+      "severity": "high"
+    },
+    {
+      "id": "A19",
+      "name": "에러 응답 형식 일관성",
+      "status": "PASS",
+      "detail": "DELETE 없는 팀: status=200, body={\"ok\":true}. JSON 형식 일관성 유지",
+      "severity": "low"
+    },
+    {
+      "id": "A20",
+      "name": "응답 시간 (500ms 이하)",
+      "status": "PASS",
+      "detail": "평균: 31ms, 최대: 146ms. 모두 500ms 이하",
+      "severity": "medium"
+    },
+    {
+      "id": "A21",
+      "name": "server.js 에러 핸들링",
+      "status": "PASS",
+      "detail": "try-catch: 18개, .on('error'): 0개",
+      "severity": "medium"
+    },
+    {
+      "id": "A22",
+      "name": "클라이언트 try-catch 에러 핸들링",
+      "status": "PASS",
+      "detail": "클라이언트 try-catch: 5개",
+      "severity": "medium"
+    },
+    {
+      "id": "A23",
+      "name": "WebSocket 에러/닫힘 핸들링",
+      "status": "PASS",
+      "detail": "onerror: true, onclose: true. 재연결 로직 포함",
+      "severity": "medium"
+    }
+  ],
+  "securitySummary": {
+    "authenticationRequired": false,
+    "securityHeaders": {
+      "x-frame-options": null,
+      "x-content-type-options": null,
+      "content-security-policy": null,
+      "x-xss-protection": null,
+      "strict-transport-security": null
+    },
+    "corsPolicy": "Not configured (localhost only, implicitly safe)",
+    "pathTraversalProtection": true,
+    "tmuxInjectionProtection": true
+  },
+  "summary": "총 23개 테스트 중 20개 통과, 3개 실패. 보안 이슈 3개: 인증 없는 DELETE/POST API, 보안 헤더 전무. path.basename + paneId sanitize는 적용됨."
+}

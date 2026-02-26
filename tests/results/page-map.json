@@ -1,0 +1,164 @@
+{
+  "url": "http://localhost:9099",
+  "timestamp": "2026-02-25T22:58:20.199Z",
+  "framework": "Vanilla JavaScript SPA",
+  "title": "Claude Team Monitor",
+  "language": "ko",
+  "routes": [
+    "/"
+  ],
+  "apiEndpoints": [
+    {
+      "method": "GET",
+      "path": "/api/state",
+      "description": "전체 상태 스냅샷(teams/tasks/messages/stats/tmuxOutputs)",
+      "responseStatus": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/teams",
+      "description": "팀 목록 및 멤버 정보",
+      "responseStatus": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/tasks",
+      "description": "태스크 목록(프로젝트별)",
+      "responseStatus": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/stats",
+      "description": "세션 통계(tool_counts, session time)",
+      "responseStatus": 200
+    },
+    {
+      "method": "POST",
+      "path": "/api/refresh",
+      "description": "데이터 강제 갱신 + WebSocket broadcast",
+      "responseStatus": 200
+    },
+    {
+      "method": "DELETE",
+      "path": "/api/teams/:name",
+      "description": "팀 디렉토리 삭제(인증 없음)",
+      "responseStatus": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/plugins",
+      "description": "플러그인 스캔(commands/agents)",
+      "responseStatus": 200
+    }
+  ],
+  "webSocket": {
+    "url": "ws://localhost:9099",
+    "protocol": "ws (plain)",
+    "events": {
+      "serverToClient": [
+        "snapshot",
+        "teams",
+        "tasks",
+        "messages",
+        "tmux",
+        "stats"
+      ],
+      "clientToServer": [
+        "captureTmux"
+      ]
+    },
+    "reconnect": "3초 자동 재연결"
+  },
+  "components": [
+    "Header (logo, team-tabs, refresh-btn, skills-btn, history-btn, conn-status)",
+    "Main Grid (220px + 1fr + 300px / 1fr + 240px)",
+    "Panel: Members (좌측 - team member cards)",
+    "Panel: Tasks (중앙 - Kanban board: Pending/InProgress/Done)",
+    "Panel: Activity Feed (우측 - 메시지 피드)",
+    "Panel: Terminal (하단 전폭 - tmux pane capture)",
+    "Stats Bar (하단 - Teams/Members/Tasks/Tool counts)",
+    "History Panel (우측 슬라이드 - 종료 팀 목록)",
+    "Skills Panel (좌측 슬라이드 - 플러그인 스킬 목록)",
+    "Skill Tooltip (고정 위치 - hover 시 표시)",
+    "No-Teams Overlay (팀 없을 때 전체 오버레이)"
+  ],
+  "features": [
+    "실시간 WebSocket 팀/태스크/메시지 모니터링",
+    "팀 탭 전환(LIVE/종료 배지)",
+    "팀 멤버 카드(active/inactive/lead 상태)",
+    "Kanban 태스크 보드(3컬럼)",
+    "에이전트 활동 피드(최근 100개)",
+    "tmux pane 캡처 및 실시간 터미널 표시",
+    "세션 통계 및 툴 사용 횟수 표시",
+    "종료 팀 히스토리 패널(삭제 기능)",
+    "플러그인 스킬 패널(검색/필터)",
+    "스킬 복사 버튼",
+    "Teams 필터 버튼",
+    "수동 새로고침(POST /api/refresh)",
+    "WebSocket 자동 재연결(3초)",
+    "팀 삭제(DELETE /api/teams/:name, confirm 대화상자 사용)",
+    "전체 히스토리 초기화(confirm 대화상자 사용)"
+  ],
+  "cssVariables": [
+    "--bg:#0d1117",
+    "--bg2:#161b22",
+    "--bg3:#21262d",
+    "--bg4:#30363d",
+    "--border:#30363d",
+    "--text:#e6edf3",
+    "--text2:#8b949e",
+    "--text3:#6e7681",
+    "--accent:#58a6ff",
+    "--green:#3fb950",
+    "--yellow:#d29922",
+    "--red:#f85149",
+    "--purple:#bc8cff",
+    "--orange:#e3b341",
+    "--cyan:#79c0ff",
+    "--lead:#ff7b72",
+    "--font-mono: SF Mono / Fira Code / Cascadia Code / Consolas"
+  ],
+  "interactiveElements": [
+    "team-tab buttons (팀 전환)",
+    "refresh-btn (새로고침)",
+    "skills-btn (플러그인 스킬 패널 토글)",
+    "history-btn (히스토리 패널 토글)",
+    "member-card (에이전트 선택 + tmux 표시)",
+    "term-tab buttons (터미널 탭 전환)",
+    "history-del-btn (팀 삭제, confirm 사용)",
+    "history-action-btn 새로고침",
+    "history-action-btn 전체초기화 (confirm 사용)",
+    "skills-search input (스킬 검색)",
+    "teams-filter-btn (팀 스킬 필터)",
+    "skill-copy-btn (명령어 복사)",
+    "skill-item hover tooltip"
+  ],
+  "layout": {
+    "type": "CSS Grid",
+    "columns": "220px 1fr 300px",
+    "rows": "1fr 240px",
+    "responsive": false,
+    "overflow": "hidden (body height:100vh)"
+  },
+  "fileSize": "63679 bytes (~62.2 KB)",
+  "dependencies": {
+    "chokidar": "^3.6.0",
+    "express": "^4.18.2",
+    "ws": "^8.16.0"
+  },
+  "security": {
+    "authentication": "none",
+    "authorization": "none",
+    "notes": [
+      "DELETE /api/teams/:name - 인증 없음, path.basename()으로 경로 탐색 방어만 있음",
+      "tmux paneId sanitize: /^[%w:.]+$/ 정규식으로 제한적 검증",
+      "POST /api/refresh - 인증 없음",
+      "XSS 방어: esc() 함수로 HTML 이스케이프 처리 (client-side)"
+    ]
+  },
+  "liveApiSample": {
+    "teams": "{\"default\":{\"name\":\"default\",\"description\":\"omc worker team\",\"createdAt\":1771948477734.991,\"members\":[{\"agentId\":\"test-lead\",\"name\":\"test-lead\",\"agentType\":\"worker\",\"isActive\":false,\"tmuxPaneId\":\"\"}]},\"hello-world-ts\":{\"name\":\"hello-world-ts\",\"description\":\"omc worker team\",\"createdAt\":1771320637756",
+    "stats": "{\"sessions\":{\"8be79135-c3ce-438c-9e95-96630ae3477f\":{\"tool_counts\":{\"Bash\":26,\"Read\":22,\"Task\":2,\"Write\":1},\"last_tool\":\"Write\",\"total_calls\":51,\"started_at\":1771319973,\"updated_at\":1771320222},\"0fb815db-70d9-4bd0-a178-601a662c609a\":{\"tool_counts\":{\"Glob\":3,\"Bash\":30,\"Read\":8,\"Task\":3,\"Skill\":1,\"Too"
+  },
+  "summary": "Claude Team Monitor는 실시간 WebSocket 기반 Vanilla JS SPA로, ~/.claude 디렉토리를 감시하여 Claude Agent Team의 팀/태스크/메시지/터미널 상태를 모니터링하는 대시보드입니다. Express.js + chokidar + ws로 구성된 백엔드가 파일시스템 변경을 감지해 브로드캐스트하며, 인증 없이 팀 삭제가 가능한 보안 이슈가 있습니다."
+}
